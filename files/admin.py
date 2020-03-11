@@ -5,6 +5,7 @@ from os.path import basename, splitext
 
 from .models import AASPItem
 
+
 def analyze_FDA(modeladmin, request, queryset):
     for item in queryset:
         tg = item.text_grid_file
