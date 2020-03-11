@@ -7,7 +7,7 @@ To start the app, create a virtual env, install requiremands and initialize the 
 pip install -r requirements.txt
 python manage.py makemigrations
 python manage.py migrate
-python mangage.py createsuperuser
+python manage.py createsuperuser
 ```
 
 Then you can run on port localhost:8400

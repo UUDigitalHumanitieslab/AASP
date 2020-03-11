@@ -1,11 +1,12 @@
-FROM python:3.6
+FROM python:3.6-alpine
 
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        postgresql-client \
-    && rm -rf /var/lib/apt/lists/*
+RUN apk update \
+    && apk add --no-cache openjdk11
+
+RUN apk add --no-cache R
+RUN -e "install.packages('textgRid', repos = 'http://cran.us.r-project.org')"
 
 RUN mkdir /code
 WORKDIR /code
