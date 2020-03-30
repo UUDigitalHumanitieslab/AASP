@@ -1,7 +1,9 @@
 from django.conf.urls import url
+from django.urls import path
 
-from . import views
+from files.views import ProvideFilesView, overview_files
 
 urlpatterns = [
-    url('', views.index, name='index'),
+    path('', ProvideFilesView.as_view()),
+    path('analyze', overview_files)
 ]

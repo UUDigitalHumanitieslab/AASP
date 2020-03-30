@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block javascript %}
+<script>
+    function toggleAll(checked) {
+        var items = document.getElementsByName('checked_files');
+        for (var i = 0; i < items.length; i++) {
+            if (items[i].type == 'checkbox')
+                items[i].checked = checked;
+        }
+    }			
+</script>
+{% endblock %}
+
+{% block content %}
+{% if item_list %}
+        <div class="field">
+            <input type="checkbox" onchange="toggleAll(checked)"> (De)select all
+        </div>
+        <div class="tile notification">
+        <form method="post">
+            {% csrf_token %}
+        <div class="field">
+            <ul>
+            {% for item in item_list %}
+                <li><input type="checkbox" name="checked_files" value="{{item.item_id}}"> {{item.speaker}}: {{ item.item_id }}</li>
+            {% endfor %}
+            </ul>
+        </div>
+        <div class="field">
+            <input class="button is-primary" type="submit" value="Run AuToDI analysis for all selected files">
+        </div>
+    </form>
+</div>
+{% else %}
+    <p>No files for analysis available.</p>
+{% endif %}
+{% endblock %}

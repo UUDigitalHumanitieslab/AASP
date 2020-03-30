@@ -1,5 +1,7 @@
 from django import forms
 
-class FileFieldForm(forms.Form):
-    speaker = forms.CharField(max_length=100)
-    file_field = forms.FileField(widget=forms.ClearableFileInput(attrs={'multiple': True}))
+class SpeakerDirectoryForm(forms.Form):
+    speaker = forms.CharField()
+    directory = forms.FileField(widget=forms.ClearableFileInput(attrs=
+        {'multiple': True, 'webkitdirectory': True, 'directory': True, 
+        'onchange':'speakerdirectoryform.submit();'}))

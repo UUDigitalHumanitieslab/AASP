@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AASP</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    {% block javascript %}{% endblock %}
+  </head>
+  <body>
+        <nav class="navbar is-dark" role="navigation" aria-label="main navigation">
+            <div class="container">
+                <div class="navbar-brand">
+                    <strong class="navbar-item">
+                        AASP
+                    </strong>
+        
+                    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
+                        data-target="navbarBasicExample" (click)="toggleBurger()"
+                        [ngClass]="{'is-active': burgerActive}">
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                        <span aria-hidden="true"></span>
+                    </a>
+                </div>
+        
+                <div id="navbarBasicExample" class="navbar-menu" [ngClass]="{'is-active': burgerActive}" [@slideInOut]="burgerShow">
+                    <div class="navbar-start">
+                        <a class="navbar-item" href="../files">
+                            Files
+                        </a>
+                        <a class="navbar-item" href="analyze">
+                            Analysis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <section class="section main-content">
+            <div class="container">
+            {% block content %}{% endblock %}
+            </div>
+        </section>
+
+        <footer class="footer is-hidden-print">
+            <div class="section">
+                <div class="container">
+                    <div class="columns">
+                        <div class="column">
+                            <h1 class="subtitle">AASP</h1>
+                            <!-- <div class="content">
+                                <p>
+                                    <a href="github:UUDigitalHumanitieslab/aasp">Source code</a> (BSD 3-Clause License)
+                                </p>
+                            </div> -->
+                        </div>
+                        <div class="column has-text-right-tablet">
+                            <a class="university-logo image" href="https://uu.nl" target="_blank">
+                                {% load static %}
+                                <img src="{% static 'utrecht-university.svg' %}" alt="Utrecht University logo" width="200"
+                                    height="50" />
+                            </a>
+                            <a class="lab-logo image" href="https://dig.hum.uu.nl" target="_blank">
+                                <img src="{% static 'dhlab.svg' %}" alt="Digital Humanities Lab logo" width="200" height="40" />
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </footer>        
+  </body>
+</html>
