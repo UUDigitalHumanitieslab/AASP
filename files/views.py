@@ -1,6 +1,9 @@
 import os.path as op
 from collections import Counter
 import subprocess
+from zipfile import ZipFile
+import io
+import glob
 
 from django.shortcuts import render
 from django.http import HttpResponse
@@ -58,9 +61,23 @@ def overview_files(request):
         for item_id in analysis_set:
             item = item_list.get(pk=item_id)
             analyze_ToDI(item)
-        return HttpResponse('success!')
+        return render(request, 'files/download.html')
     else:
         return HttpResponse(template.render(context, request))
+
+
+def download_files(request):
+    if request.method == "POST":
+        s = io.BytesIO()
+        zf = ZipFile(s, "w")
+        for analyzed_file in glob.glob('output/*.TextGrid'):
+            zf.write(analyzed_file)
+        zf.close()
+        response = HttpResponse(s.getvalue(), content_type="application/x-zip-compressed")
+        response['Content-Disposition'] = 'attachment; filename=results.zip'
+        return response
+    else:
+        return render(request, 'files/download.html', {})
 
 
 def analyze_ToDI(item):
@@ -71,11 +88,11 @@ def analyze_ToDI(item):
         "-input_file={}".format(tg),
         "-wav_file={}".format(wav),
         "-out_file=output/{}_output.TextGrid".format(op.splitext(op.basename(str(wav)))[0]),
-        "-pitch_accent_detector=AuToDI/bdc_burnc.acc.detection.model",
-        "-pitch_accent_classifier=AuToDI/v3.7.5_pitch accent classification.model",
+        "-pitch_accent_detector=AuToDI/v3.7.5_pitch_accent_detection.model",
+        "-pitch_accent_classifier=AuToDI/v3.7.5_pitch_accent_classification.model",
         "-intonational_phrase_boundary_detector=AuToDI/bdc_burnc.intonp.dection.model",
         "-intermediate_phrase_boundary_detector=AuToDIbdc_burnc.interp.detection.model",
-        "-boundary_tone_classifier=AuToDI/bdc_burnc.pabt.classification.model",
+        "-boundary_tone_classifier=AuToDI/v3.7.5_boundary_tone_classification.model",
         "-phrase_accent_classifier=AuToDI/bdc_burnc.phacc.classification.model",
         "-words_tier_name=segment",
         "-tones_tier_name=intonation"
