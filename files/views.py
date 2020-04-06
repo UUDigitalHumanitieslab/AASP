@@ -5,7 +5,7 @@ from zipfile import ZipFile
 import io
 import glob
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic.edit import FormView
 from django.core.files.uploadhandler import MemoryFileUploadHandler, TemporaryFileUploadHandler
@@ -61,7 +61,7 @@ def overview_files(request):
         for item_id in analysis_set:
             item = item_list.get(pk=item_id)
             analyze_ToDI(item)
-        return render(request, 'files/download.html')
+        return redirect(download_files)
     else:
         return HttpResponse(template.render(context, request))
 
