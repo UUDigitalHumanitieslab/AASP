@@ -1,4 +1,5 @@
 import os.path as op
+import os
 from collections import Counter
 import subprocess
 from zipfile import ZipFile
@@ -58,6 +59,8 @@ def overview_files(request):
     }
     if request.method == "POST":
         analysis_set = request.POST.getlist('checked_files')
+        if not op.exists('output'):
+            os.makedirs('output')
         for item_id in analysis_set:
             item = item_list.get(pk=item_id)
             analyze_ToDI(item)
