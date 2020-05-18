@@ -1,0 +1,19 @@
+version: '3'
+
+services:
+    db:
+        image: postgres
+        environment:
+          - POSTGRES_DB=aasp
+          - POSTGRES_USER=aasp
+          - POSTGRES_PASSWORD=aasp
+        volumes:
+          - postgres_data:/var/lib/postgresql/data/
+    backend:
+        build:
+          context: .
+        depends_on:
+          - db
+
+volumes:
+    postgres_data:
