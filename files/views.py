@@ -5,6 +5,7 @@ import subprocess
 from zipfile import ZipFile
 import io
 import glob
+import csv
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
@@ -12,6 +13,8 @@ from django.views.generic.edit import FormView
 from django.core.files.uploadhandler import MemoryFileUploadHandler, TemporaryFileUploadHandler
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.template import loader
+
+import parselmouth
 
 from files.forms import SpeakerDirectoryForm
 from files.models import AASPItem
@@ -101,3 +104,33 @@ def analyze_ToDI(item):
         "-tones_tier_name=intonation"
     ]
     subprocess.check_call(call)
+
+
+def analyze_FDA(item):
+    wav = item.wav_file
+    if not item.pitch_file:
+        sound = parselmouth.Sound(wav)
+        # get pitches at 5 ms intervals
+        pitches = sound.to_pitch(0.005)
+        selected_pitches = pitches.selected_array
+        # get formants with Burg method
+        formants = sound.to_formant_burg(0.005)
+        filename = '{}.pitch'.format(op.basename(wav))
+        with open(filename, 'w+') as f:
+            outfile = csv.DictWriter(f, fieldnames=('time', 'f0', 'f1bark', 'f2bark'))
+            outfile.writeheader()
+            for index, t in enumerate(formants.ts()):
+                # get formant 1 and 2 for each time unit
+                f1 = formants.get_value_at_time(1, t, parselmouth.FormantUnit.BARK)
+                f2 = formants.get_value_at_time(2, t, parselmouth.FormantUnit.BARK)
+                outfile.writerow({
+                    'time': int(round(t*1000)), 
+                    'f0': selected_pitches[index][0],
+                    'f1bark': f1,
+                    'f2bark': f2
+                })
+        item.pitch_file = outfile
+        item.save()
+    # call R script with this data
+
+
