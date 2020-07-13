@@ -4,6 +4,7 @@ Django==3.0
 docopt==0.6.2
 praat-parselmouth==0.3.3
 pykwalify==1.7.0
+pympi-ling==1.69
 pytz==2019.3
 ruamel.yaml==0.15.100
 sqlparse==0.3.0

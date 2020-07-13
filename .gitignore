@@ -34,5 +34,7 @@ venv.bak/
 
 *.TextGrid
 *.wav
+*.csv
+*.pitch
 
 Docker-experiments/

@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
     db:
@@ -12,6 +12,10 @@ services:
     backend:
         build:
           context: .
+        volumes:
+          - type: bind
+            source: .
+            target: /code
         depends_on:
           - db
         ports:

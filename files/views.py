@@ -14,7 +14,8 @@ from django.core.files.uploadhandler import MemoryFileUploadHandler, TemporaryFi
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from django.template import loader
 
-import parselmouth
+import parselmouth # Praat wrapper
+import pympi # pympi-ling for textgrid processing
 
 from files.forms import SpeakerDirectoryForm
 from files.models import AASPItem
@@ -64,13 +65,31 @@ def overview_files(request):
         analysis_set = request.POST.getlist('checked_files')
         if not op.exists('output'):
             os.makedirs('output')
-        for item_id in analysis_set:
-            item = item_list.get(pk=item_id)
-            analyze_ToDI(item)
-        return redirect(download_files)
+        if 'autodi' in request.POST:
+            for item_id in analysis_set:
+                item = item_list.get(pk=item_id)
+                analyze_ToDI(item)
+            return redirect(download_files)
+        elif 'fda' in request.POST:
+            with open(op.join('input_files', 'data.csv'), 'w+') as f:        
+                csv_writer = csv.DictWriter(f, 
+                fieldnames=('filename', 'spk'))
+                csv_writer.writeheader()
+                for item_id in analysis_set:
+                    item = item_list.get(pk=item_id)
+                    analyze_pitches_FDA(item)
+                    line = {
+                        'filename': item.item_id,
+                        'spk': item.speaker,
+                    }
+                    csv_writer.writerow(line)
+            return redirect(fda_smoothing)
     else:
         return HttpResponse(template.render(context, request))
 
+
+def fda_smoothing(request):
+    return render(request, 'files/fda_smoothing.html', {})
 
 def download_files(request):
     if request.method == "POST":
@@ -105,19 +124,33 @@ def analyze_ToDI(item):
     ]
     subprocess.check_call(call)
 
-
-def analyze_FDA(item):
-    wav = item.wav_file
+def analyze_pitches_FDA(item):
+    wav = str(item.wav_file)
     if not item.pitch_file:
         sound = parselmouth.Sound(wav)
         # get pitches at 5 ms intervals
         pitches = sound.to_pitch(0.005)
+        roi = []
+        counter = 0
+        counterIncremented = False
         selected_pitches = pitches.selected_array
+        # find all consecutive samples in which f0 != 0.0
+        # assign region of interest index
+        for p in selected_pitches:
+            if p[0]==0.0:
+                roi.append(0)
+                if not counterIncremented:
+                    counter += 1
+                    counterIncremented = True
+            else:
+                roi.append(counter)
+                if counterIncremented:
+                    counterIncremented = False
         # get formants with Burg method
         formants = sound.to_formant_burg(0.005)
-        filename = '{}.pitch'.format(op.basename(wav))
-        with open(filename, 'w+') as f:
-            outfile = csv.DictWriter(f, fieldnames=('time', 'f0', 'f1bark', 'f2bark'))
+        filename = '{}.pitch'.format(op.splitext(op.basename(wav))[0])
+        with open(op.join('input_files', filename), 'w+') as f:
+            outfile = csv.DictWriter(f, fieldnames=('time', 'f0', 'f1bark', 'f2bark', 'roi'))
             outfile.writeheader()
             for index, t in enumerate(formants.ts()):
                 # get formant 1 and 2 for each time unit
@@ -127,10 +160,10 @@ def analyze_FDA(item):
                     'time': int(round(t*1000)), 
                     'f0': selected_pitches[index][0],
                     'f1bark': f1,
-                    'f2bark': f2
+                    'f2bark': f2,
+                    'roi': roi[index]
                 })
-        item.pitch_file = outfile
+        item.pitch_file = filename
         item.save()
-    # call R script with this data
 
 

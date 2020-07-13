@@ -5,3 +5,4 @@ class AASPItem(models.Model):
     speaker = models.CharField(max_length=100)
     wav_file = models.FileField(upload_to='input_files/')
     text_grid_file = models.FileField(upload_to='input_files/')
+    pitch_file = models.FileField(upload_to='input_files/', null=True, default=None)
