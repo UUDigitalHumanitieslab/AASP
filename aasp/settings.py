@@ -25,7 +25,7 @@ SECRET_KEY = '0%&_wf(*_s@symly9c)x!u_7t5(8rule-k7gxujl_zt)4ul13u'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['tst.aasp.hum.uu.nl']
 
 
 # Application definition
