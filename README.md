@@ -15,15 +15,15 @@ Then you can run on port localhost:8400
 python manage.py runserver --port 8400
 ```
 
-Alternatively, with docker: run
+Alternatively, with docker-compose:
 ```
-# build from this directory, tag image as aasp
-docker build . -t aasp
-# run a countainer with name aasp from image aasp:latest
-# expose container port 8000 as port 8400 on localhost
-docker run --name aasp -p 8400:8000 --rm aasp
+docker-compose up
 ```
-This will copy over the local database to the container. This may be changed at a later stage.
+This will take a long time to start up the first time, but restarting at a later time should be fast.
 
-# Authentication
-At the moment, authentication is required. There is a file called `auto_auth.py`, which is work in progress to override authentication (should be registered with middleweare, but doesn't work yet).
+Stop the application with crtl-C. If you added items to the AASP database, these will be retained and available on your next start of the application.
+
+If there is a new version of this software, you should rebuild by running
+```
+docker-compose up --build
+```
