@@ -1,0 +1,5 @@
+output/
+input_files/
+plots/
+
+db.sqlite3
