@@ -16,10 +16,12 @@ from django.template import loader
 
 import parselmouth # Praat wrapper
 import pympi # pympi-ling for textgrid processing
+import pandas as pd
 
 from files.forms import SpeakerDirectoryForm
 from files.models import AASPItem
 
+csv_file_name = op.join('input_files', 'data.csv')
 
 # class CustomMemoryFileUploadHandler(MemoryFileUploadHandler):
 #     def new_file(self, *args, **kwargs):
@@ -71,7 +73,7 @@ def overview_files(request):
                 analyze_ToDI(item)
             return redirect(download_files)
         elif 'fda' in request.POST:
-            with open(op.join('input_files', 'data.csv'), 'w+') as f:        
+            with open(csv_file_name, 'w+') as f:        
                 csv_writer = csv.DictWriter(f, 
                 fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
@@ -83,9 +85,45 @@ def overview_files(request):
                         'spk': item.speaker,
                     }
                     csv_writer.writerow(line)
-            return redirect(fda_smoothing)
+            return redirect(fda_select_tier)
     else:
         return HttpResponse(template.render(context, request))
+
+
+def fda_select_tier(request):
+    if request.method == "POST":
+        tier = request.POST.get('tier')[0]
+        return redirect(fda_select_interval, tier)
+    df = pd.read_csv(csv_file_name)
+    # check the first file in the analysis batch (directly under header)
+    check_file = get_tg_name(df.iloc[0]['filename'])
+    tg = pympi.Praat.TextGrid(check_file)
+    tiers = tg.get_tier_name_num()
+    tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
+    return render(request, 'files/fda_select_tier.html', {'tier_list': tier_names})
+
+
+def fda_select_interval(request, tier):
+    df = pd.read_csv(csv_file_name)
+    if request.method == "POST":
+        interval = request.POST.get('interval')[0]
+        start_times = []
+        end_times = []
+        for index, f in df.iterrows():
+            tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
+            iv = list(tg.get_tier(tier).get_intervals())[int(interval)-1]
+            start_times.append(int(iv[0]*1000))
+            end_times.append(int(iv[1]*1000))
+        dois = pd.DataFrame({'doi_start_time': start_times, 'doi_end_time': end_times})
+        df_with_dois = df.join(dois)
+        df_with_dois.to_csv(op.join('input_files', 'data_with_dois.csv'), index=False)
+        return HttpResponse('ok')
+    check_file = get_tg_name(df.iloc[0]['filename'])
+    tg = pympi.Praat.TextGrid(check_file)
+    tier = tg.get_tier(tier)
+    ivs = tier.get_intervals()
+    interval_list = ['{}: {}'.format(index+1, i[2]) for index, i in enumerate(ivs)]
+    return render(request, 'files/fda_select_interval.html', {'interval_list': interval_list})
 
 
 def fda_smoothing(request):
@@ -130,22 +168,7 @@ def analyze_pitches_FDA(item):
         sound = parselmouth.Sound(wav)
         # get pitches at 5 ms intervals
         pitches = sound.to_pitch(0.005)
-        roi = []
-        counter = 0
-        counterIncremented = False
         selected_pitches = pitches.selected_array
-        # find all consecutive samples in which f0 != 0.0
-        # assign region of interest index
-        for p in selected_pitches:
-            if p[0]==0.0:
-                roi.append(0)
-                if not counterIncremented:
-                    counter += 1
-                    counterIncremented = True
-            else:
-                roi.append(counter)
-                if counterIncremented:
-                    counterIncremented = False
         # get formants with Burg method
         formants = sound.to_formant_burg(0.005)
         filename = '{}.pitch'.format(op.splitext(op.basename(wav))[0])
@@ -161,9 +184,10 @@ def analyze_pitches_FDA(item):
                     'f0': selected_pitches[index][0],
                     'f1bark': f1,
                     'f2bark': f2,
-                    'roi': roi[index]
                 })
         item.pitch_file = filename
         item.save()
 
 
+def get_tg_name(filename):
+    return op.join('input_files', filename + '.TextGrid')
