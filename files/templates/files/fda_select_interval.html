@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+Select the interval you wish to analyze. To guide you, we show the labels
+of the first file of the selected analysis files.
+<form id="select_interval_form" method="post">{% csrf_token %}
+    <select name="interval">
+        {% for interval in interval_list %}
+        <option value="{{interval}}">{{interval}}</option>
+        {% endfor %}
+    </select>
+    <input type="submit">
+</form>
+
+{% endblock %}
