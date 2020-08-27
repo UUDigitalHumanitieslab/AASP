@@ -70,6 +70,9 @@ min_dur_f0 = min(dur_f0)
 n_knots_vec <- seq(4,trunc(median(len_f0)/2),4) # explore from 4 knots up to around half the number of samples
 loglam_vec <- seq(-4,10,2) # explore lambda from 10^(-4) to 10^10
 
+cat(loglam_vec, '\n')
+cat(n_knots_vec, '\n')
+
 if (length(unique(all_data$id)) > 5) {
   sampled_ids <- sample(unique(all_data$id),5) # a data subset, to save computation time
 } else {

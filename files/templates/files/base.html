@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html>
   <head>
@@ -5,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>AASP</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
+    <link rel="stylesheet" href="{% static 'css/base.css' %}">
     <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     {% block javascript %}{% endblock %}
   </head>
@@ -28,13 +31,13 @@
         
                 <div id="navbarBasicExample" class="navbar-menu" [ngClass]="{'is-active': burgerActive}" [@slideInOut]="burgerShow">
                     <div class="navbar-start">
-                        <a class="navbar-item" href="../files">
+                        <a class="navbar-item" href="/files">
                             Files
                         </a>
-                        <a class="navbar-item" href="../analyze">
+                        <a class="navbar-item" href="/analyze">
                             Analysis
                         </a>
-                        <a class="navbar-item" href="../download">
+                        <a class="navbar-item" href="/download">
                             Download
                         </a>
                     </div>
@@ -48,12 +51,12 @@
             </div>
         </section>
 
-        <footer class="footer is-hidden-print">
-            <div class="section">
+        <footer class="footer">
+            <div class="content">
                 <div class="container">
                     <div class="columns">
                         <div class="column">
-                            <h1 class="subtitle">Automatic Analysis of Speech Prosody</h1>
+                            <h3 class="subtitle">Automatic Analysis of Speech Prosody</h3>
                             <!-- <div class="content">
                                 <p>
                                     <a href="github:UUDigitalHumanitieslab/aasp">Source code</a> (BSD 3-Clause License)
@@ -62,12 +65,10 @@
                         </div>
                         <div class="column has-text-right-tablet">
                             <a class="university-logo image" href="https://uu.nl" target="_blank">
-                                {% load static %}
-                                <img src="{% static 'utrecht-university.svg' %}" alt="Utrecht University logo" width="200"
-                                    height="50" />
+                                <img src="{% static 'utrecht-university.svg' %}" alt="Utrecht University logo" />
                             </a>
                             <a class="lab-logo image" href="https://dig.hum.uu.nl" target="_blank">
-                                <img src="{% static 'dhlab.svg' %}" alt="Digital Humanities Lab logo" width="200" height="40" />
+                                <img src="{% static 'dhlab.svg' %}" alt="Digital Humanities Lab logo"/>
                             </a>
                         </div>
                     </div>
