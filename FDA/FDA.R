@@ -19,10 +19,10 @@ library(fda)
 library(lattice)
 library(ggplot2)
 
-root_dir = '/Users/janss089/git/aasp/'
+root_dir = '/code/'
 plots_dir = paste(root_dir,'plots/',sep='')
-data_dir =  paste(root_dir,'input_data/',sep='')
-scripts_dir =  paste(root_dir,'scripts/',sep='')
+data_dir =  paste(root_dir,'input_files/',sep='')
+scripts_dir =  paste(root_dir,'FDA/',sep='')
 
 # use pca.fd version from package fda_2.2.5.tar.gz or earlier (you find a copy in the scripts/ dir)
 source(paste(scripts_dir,'pca.fd.R',sep=''))
@@ -33,9 +33,7 @@ source(paste(scripts_dir,'landmarkreg.nocurve.R',sep=''))
 source(paste(scripts_dir,'plot.pca.fd.corr.R',sep=''))
 
 
-# filename, speaker, class, durations ('DH' stands for diphthong-hiatus) 
-# DH_data = read.csv(file = paste(data_dir,"DH_data.csv",sep=''))
-data = read.csv(file = paste(own_dir,"data_with_dois.csv",sep=''))
+data = read.csv(file = paste(data_dir,"data_with_dois.csv",sep=''))
 n_items = dim(data)[1]
 speakers = unique(data$spk) 
 
@@ -45,7 +43,7 @@ dur_f0 = c() # in ms
 all_data <- data.frame()
 
 for (i in 1:n_items) {
-    item <- read.csv(paste(own_dir,data$filename[i],".pitch",sep=''),h=T)
+    item <- read.csv(paste(data_dir,data$filename[i],".pitch",sep=''),h=T)
     sample = item[item$time>=data$doi_start_time[i]&item$time<=data$doi_end_time[i]&item$f0>0.1,]
     sample$id <- i
     sample$time_zero <- sample$time - sample$time[1]
