@@ -13,27 +13,32 @@
 #   Modified by DigialHumanitiesLab, Utrecht University, 2020
 ####################################################################################################
 
+suppressPackageStartupMessages(library(fda))
+suppressPackageStartupMessages(library(lattice))
+suppressPackageStartupMessages(library(ggplot2))
 
 
 library(fda)
 library(lattice)
 library(ggplot2)
 
-root_dir = '/code/'
-plots_dir = paste(root_dir,'plots/',sep='')
-data_dir =  paste(root_dir,'input_files/',sep='')
-scripts_dir =  paste(root_dir,'FDA/',sep='')
+root_dir = getwd()
+plots_dir = file.path(root_dir,'plots/')
+data_dir =  file.path(root_dir,'input_files/')
+scripts_dir =  file.path(root_dir,'FDA/')
 
 # use pca.fd version from package fda_2.2.5.tar.gz or earlier (you find a copy in the scripts/ dir)
-source(paste(scripts_dir,'pca.fd.R',sep=''))
+source(file.path(scripts_dir, 'pca.fd.R'))
 # this is a modified version of the landmarkreg() command 
-source(paste(scripts_dir,'landmarkreg.nocurve.R',sep=''))
-# this is a slightly modified version of the plot.pca.fd() command,
+source(file.path(scripts_dir,'landmarkreg.nocurve.R'))
+# this is a slightly modified version of the plot.pca.fd() command, 
 # but you can also use the standard one.
-source(paste(scripts_dir,'plot.pca.fd.corr.R',sep=''))
+source(file.path(scripts_dir,'plot.pca.fd.corr.R'))
 
 
-data = read.csv(file = paste(data_dir,"data_with_dois.csv",sep=''))
+# filename, speaker, class, durations ('DH' stands for diphthong-hiatus) 
+# DH_data = read.csv(file = paste(data_dir,"DH_data.csv",sep=''))
+data = read.csv(file = paste(data_dir,"data_with_rois.csv",sep=''))
 n_items = dim(data)[1]
 speakers = unique(data$spk) 
 
@@ -44,7 +49,7 @@ all_data <- data.frame()
 
 for (i in 1:n_items) {
     item <- read.csv(paste(data_dir,data$filename[i],".pitch",sep=''),h=T)
-    sample = item[item$time>=data$doi_start_time[i]&item$time<=data$doi_end_time[i]&item$f0>0.1,]
+    sample = item[item$time>=data$roi_start_time[i]&item$time<=data$roi_end_time[i]&item$f0>0.1,]
     sample$id <- i
     sample$time_zero <- sample$time - sample$time[1]
     sample$f0_log <- 12 * logb(sample$f0, base = 2)
@@ -64,6 +69,7 @@ min_dur_f0 = min(dur_f0)
 
 n_knots_vec <- seq(4,trunc(median(len_f0)/2),4) # explore from 4 knots up to around half the number of samples
 loglam_vec <- seq(-4,10,2) # explore lambda from 10^(-4) to 10^10
+
 if (length(unique(all_data$id)) > 5) {
   sampled_ids <- sample(unique(all_data$id),5) # a data subset, to save computation time
 } else {
@@ -86,10 +92,20 @@ for (k in n_knots_vec) {
         for (id in sampled_ids) {
             # apply linear time normalization
             t_norm <- (all_data$f0_norm[all_data$id==id] / dur_f0[id]) * mean_dur_f0
-            gcv_err <- cbind(gcv_err, smooth.basis(t_norm,all_data$f0_norm[all_data$id==id],fdPar_Obj)$gcv)
-            gcv_log_err <- log(median(gcv_err, na.rm = T))
-            gcv_err_frame <- rbind(gcv_err_frame, c(k, l, gcv_log_err))
+            bSpline <- tryCatch({
+              smooth.basis(t_norm,all_data$f0_norm[all_data$id==id],fdPar_Obj)},
+              error = function(err) {
+                # print(paste("ERROR:  ", err))
+                })
+            if (typeof(bSpline)=="list") {
+              gcv_err <- cbind(gcv_err, bSpline$gcv) 
+            }
         }
+        if (is.null(gcv_err)) {
+          next
+        }
+        gcv_log_err <- log(median(gcv_err, na.rm = T))
+        gcv_err_frame <- rbind(gcv_err_frame, c(k, l, gcv_log_err))
     }
 }    
 
@@ -99,17 +115,14 @@ colnames(gcv_err_frame) <- c('knots', 'lambda', 'gcv_err')
 png(paste(plots_dir,'GCV_log_err_f0.png',sep=''))
 ggplot(gcv_err_frame, aes(knots, lambda, fill=gcv_err)) +
   geom_tile() +
-  scale_x_continuous("Knots", breaks=c(4,8)) +
-  scale_y_continuous("Lambda", breaks=c(-4, -2, 0, 2, 4, 6, 8, 10), minor_breaks=NULL)
+  scale_x_continuous("Knots", breaks=n_knots_vec) +
+  scale_y_continuous("Lambda", breaks=loglam_vec, minor_breaks=NULL)
 dev.off()
 
 # min GCV error is in:
 minerr <- min(gcv_err_frame$gcv_err)
 argmin <- gcv_err_frame[gcv_err_frame$gcv_err==minerr,] # rows are lambda indices, cols are n_knots indices
-# arg min log lambda is:
-argmin$lambda
-# arg min n_knots is:
-argmin$knots
+
 
 # Inspection of gcv_log_err for f0 shows that:
 # min estimated gcv error is obtained basically at the highest number of knots and at low lambda.
@@ -130,10 +143,12 @@ for (l in loglam_vec) {
 		fdPar_Obj <- fdPar(basis, Lfdobj,lambda)
 		t_norm <- (all_data$time_zero[all_data$id==id] / dur_f0[id]) * mean_dur_f0
 		y_fd <- smooth.basis(t_norm,all_data$f0_norm[all_data$id==id],fdPar_Obj)$fd
-		png(paste(plots_dir,'f0_fit_loglam',l,'n_knots',k,'.png',sep=''))
-		
-		plot(y_fd,xlab='time (ms)',ylab='F0 (norm. semitones)',main = '',las=1,cex.axis=1.5,cex.lab=1.5,col='red',lwd=3,ylim=c(-3,5))
+		png(paste(plots_dir,'f0fitloglam_',l,'_knots_',k,'_.png',sep=''))
+		plot(y_fd,xlab='time (ms)',ylab='F0 (norm. semitones)',main=paste('log(lambda)=',l,', knots=',k,sep=''),las=1,cex.axis=1.5,cex.lab=1.5,col='red',lwd=3,ylim=c(-3,5))
 		points(t_norm,all_data$f0_norm[all_data$id==id],pch=20)
 	  dev.off()
   }
 }
+
+# print lambda and knots leading to lowest gvc_err
+cat(argmin$lambda,argmin$knots)
