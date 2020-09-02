@@ -37,6 +37,6 @@ venv.bak/
 *.csv
 *.pitch
 
-Docker-experiments/
 output/
 input_files/
+plots/
