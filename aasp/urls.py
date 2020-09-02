@@ -16,12 +16,12 @@ Including another URLconf
 from django.urls import include, path
 from django.contrib import admin
 
-from files.views import download_files
+from files.views import DownloadView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('files/', include('files.urls')),
     path('analyze/', include('analyze.urls')),
-    path('download', download_files),
+    path('download/', DownloadView.as_view(), name='download'),
 ]

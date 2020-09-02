@@ -7,25 +7,15 @@ import glob
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
+from django.views.generic.base import TemplateView
 from django.views.generic.edit import FormView
 from django.core.files.uploadhandler import MemoryFileUploadHandler, TemporaryFileUploadHandler
 from django.views.decorators.csrf import csrf_exempt, csrf_protect
 
+
 from files.forms import SpeakerDirectoryForm
 from files.models import AASPItem
 
-
-# class CustomMemoryFileUploadHandler(MemoryFileUploadHandler):
-#     def new_file(self, *args, **kwargs):
-#         args = (args[0], args[1].replace('/', '-').replace('\\', '-')) + args[2:]
-#         super(CustomMemoryFileUploadHandler, self).new_file(*args, **kwargs)
-
-
-# class CustomTemporaryFileUploadHandler(TemporaryFileUploadHandler):
-#     def new_file(self, *args, **kwargs):
-#         args = (args[0], args[1].replace('/', '-').replace('\\', '-')) + args[2:]
-#         super(CustomTemporaryFileUploadHandler, self).new_file(*args, **kwargs)
-        
 
 class ProvideFilesView(FormView):
     form_class = SpeakerDirectoryForm
@@ -49,8 +39,10 @@ class ProvideFilesView(FormView):
             return self.form_invalid(form)
 
 
-def download_files(request):
-    if request.method == "POST":
+class DownloadView(TemplateView):
+    template_name = 'files/download.html'
+    
+    def post(self, request, *args, **kwargs):
         s = io.BytesIO()
         zf = ZipFile(s, "w")
         for analyzed_file in glob.glob('output/*.TextGrid'):
@@ -59,5 +51,3 @@ def download_files(request):
         response = HttpResponse(s.getvalue(), content_type="application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=results.zip'
         return response
-    else:
-        return render(request, 'files/download.html', {})
