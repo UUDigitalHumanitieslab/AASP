@@ -109,15 +109,22 @@ class FDASelectIntervalView(View):
         grid_knots = output[1].split(" ")[:-1]
         lam, knots = output[-1].split(" ")
         request.session.update({
-            'lam':lam, 'knots':knots, 
+            'lambda':lam, 'knots':knots, 
             'grid_lam': grid_lam, 'grid_knots': grid_knots})
         return HttpResponseRedirect('../../../fda_smoothing')
 
 
-def fda_smoothing(request):
-    arguments = ['lam', 'knots', 'grid_lam', 'grid_knots']
-    args = {key: request.session[key] for key in arguments}
-    return render(request, 'analyze/fda_smoothing.html', args)
+class FDASmoothingView(View):
+    def get(self, request, *args, **kwargs):
+        arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots']
+        args = {key: request.session[key] for key in arguments}
+        return render(request, 'analyze/fda_smoothing.html', args)
+
+    def post(self, request, *args, **kwargs):
+        lam = request.POST.get('lambda')
+        knots = request.POST.get('knots')
+        # to do: call FDA script
+        return HttpResponse(' '.join([lam, knots]))
 
 
 def get_tg_name(filename):
