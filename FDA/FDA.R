@@ -73,10 +73,11 @@ loglam_vec <- seq(-4,10,2) # explore lambda from 10^(-4) to 10^10
 cat(loglam_vec, '\n')
 cat(n_knots_vec, '\n')
 
-if (length(unique(all_data$id)) > 5) {
-  sampled_ids <- sample(unique(all_data$id),5) # a data subset, to save computation time
+ids <- unique(all_data$id)
+if (length(ids) > 5) {
+  sampled_ids <- sample(ids,5) # a data subset, to save computation time
 } else {
-  sampled_ids <- unique(all_data$id)
+  sampled_ids <- ids
 }
 
 gcv_err_frame <- data.frame()

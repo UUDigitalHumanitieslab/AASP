@@ -1,14 +1,22 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>Choose smoothing parameters:</h1>
+<h1>
+    Choose smoothing parameters. The preselected values are those
+    which are optimal according to the gvc error plot (below).
+    Below that, you can check the curves for all combination of knots 
+    and log(lambda) to ensure that no overfitting takes place.
+</h1>
 <form id="select_smoothing_params_form" method="post">{% csrf_token %}
     <div class="field has-addons">
         <p class="control">
             <span class="select">
                 <select class=select name="lambda">
                 {% for lam in grid_lam %}
-                    <option value="{{lam}}">log(Lambda): {{lam}}</option>
+                    <option value="{{lam}}" 
+                    {% if lam == lambda %}selected="selected"{% endif %}>
+                        log(Lambda): {{lam}}
+                    </option>
                 {% endfor %}
                 </select>
             </span>
@@ -17,7 +25,10 @@
             <span class="select">
                 <select name="knots">
                     {% for knot in grid_knots %}
-                        <option value="{{knot}}">Knots: {{knot}}</option>
+                        <option value="{{knot}}"
+                        {% if knot == knots %}selected="selected"{% endif %}>
+                            Knots: {{knot}}
+                        </option>
                     {% endfor %}
                 </select>
             </span>
@@ -28,11 +39,5 @@
     </div>
 </form>
 <img src="charts/gcverr">
-<h3>
-    Optimal log(Lambda) according to minimized error: {{lam}}
-</h3>
-<h3>
-    Optimal number of knots according to minimized error: {{knots}}
-</h3>
 <img src="charts/combined">
 {% endblock %}
