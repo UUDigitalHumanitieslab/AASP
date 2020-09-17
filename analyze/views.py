@@ -93,17 +93,18 @@ class FDASelectIntervalView(View):
     def post(self, request, *args, **kwargs):
         df, tg = self.get_initialization_files()
         interval = int(request.POST.get('interval')[0])
-        tier = tg.get_tier(int(kwargs['tier']))
+        tier_no = int(kwargs['tier'])
         start_times = []
         end_times = []
         for index, f in df.iterrows():
             tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
+            tier = tg.get_tier(tier_no)
             iv = list(tier.get_intervals())[interval-1]
             start_times.append(int(iv[0]*1000))
             end_times.append(int(iv[1]*1000))
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
-        call = ["Rscript", "--vanilla", "FDA/FDA.R"]
+        call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
         output = subprocess.check_output(call).decode().split('\n')
         grid_lam = output[0].split(" ")[:-1]
         grid_knots = output[1].split(" ")[:-1]
@@ -123,7 +124,8 @@ class FDASmoothingView(View):
     def post(self, request, *args, **kwargs):
         lam = request.POST.get('lambda')
         knots = request.POST.get('knots')
-        # to do: call FDA script
+        call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots]
+        output = subprocess.check_output(call)
         return HttpResponse(' '.join([lam, knots]))
 
 
