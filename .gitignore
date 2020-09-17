@@ -32,11 +32,4 @@ ENV/
 env.bak/
 venv.bak/
 
-*.TextGrid
-*.wav
-*.csv
-*.pitch
-
-output/
-input_files/
-plots/
+*.RData

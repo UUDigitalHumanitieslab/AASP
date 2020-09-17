@@ -157,4 +157,4 @@ for (l in loglam_vec) {
 # print lambda and knots leading to lowest gvc_err
 cat(argmin$lambda,argmin$knots)
 
-save.image(file='fdaEnvironment.RData')
+save.image(file=file.path(scripts_dir, 'fdaEnvironment.RData'))
