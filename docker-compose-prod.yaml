@@ -28,7 +28,7 @@ services:
             target: /code
           - static_data:/app/static
         environment:
-          ALLOWED_HOSTS: ['tst.aasp.hum.uu.nl']
+          ALLOWED_HOSTS: tst.aasp.hum.uu.nl
         depends_on:
           - db
         ports:
