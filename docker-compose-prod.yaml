@@ -27,12 +27,11 @@ services:
             source: .
             target: /code
           - static_data:/app/static
-        environment:
-          ALLOWED_HOSTS: tst.aasp.hum.uu.nl
         depends_on:
           - db
         ports:
           - 8000:8000
+        entrypoint: ./entrypoint.sh
         command: gunicorn --bind 0.0.0.0:8000 --workers 4 aasp.wsgi
 
 volumes:
