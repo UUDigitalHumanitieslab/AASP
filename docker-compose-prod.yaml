@@ -31,7 +31,7 @@ services:
           - db
         ports:
           - 8000:8000
-        entrypoint: entrypoint.sh
+        entrypoint: ./entrypoint.sh
 
 volumes:
     postgres_data:
