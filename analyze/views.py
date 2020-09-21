@@ -41,7 +41,7 @@ class AnalyzeView(TemplateView):
             for item_id in analysis_set:
                 item = item_list.get(pk=item_id)
                 analyze_ToDI(item)
-            return HttpResponseRedirect('../download/')
+            return HttpResponseRedirect('../download/AuToDI')
         elif 'fda' in request.POST:
             with open(csv_file_name, 'w') as f:        
                 csv_writer = csv.DictWriter(f, 
@@ -126,7 +126,7 @@ class FDASmoothingView(View):
         knots = request.POST.get('knots')
         call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots]
         output = subprocess.check_output(call)
-        return HttpResponse(' '.join([lam, knots]))
+        return HttpResponseRedirect('../download/FDA')
 
 
 def get_tg_name(filename):

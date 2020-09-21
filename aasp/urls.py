@@ -15,13 +15,15 @@ Including another URLconf
 """
 from django.urls import include, path
 from django.contrib import admin
+from django.views.generic import RedirectView
 
 from files.views import DownloadView
 
 
 urlpatterns = [
+    path('', RedirectView.as_view(url='files/')),
     path('admin/', admin.site.urls),
     path('files/', include('files.urls')),
     path('analyze/', include('analyze.urls')),
-    path('download/', DownloadView.as_view(), name='download'),
+    path('download/<slug:method>', DownloadView.as_view(), name='download'),
 ]

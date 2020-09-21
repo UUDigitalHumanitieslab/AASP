@@ -1,6 +1,7 @@
 
 from collections import Counter
 from zipfile import ZipFile
+import os
 import os.path as op
 import io
 import glob
@@ -42,11 +43,13 @@ class ProvideFilesView(FormView):
 class DownloadView(TemplateView):
     template_name = 'files/download.html'
     
-    def post(self, request, *args, **kwargs):
+    def post(self, request, method, *args, **kwargs):
         s = io.BytesIO()
         zf = ZipFile(s, "w")
-        for analyzed_file in glob.glob('output/*.TextGrid'):
+        output_selector = '{}_output/*.*'.format(method)
+        for analyzed_file in glob.glob(output_selector):
             zf.write(analyzed_file)
+            os.remove(analyzed_file)
         zf.close()
         response = HttpResponse(s.getvalue(), content_type="application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=results.zip'
