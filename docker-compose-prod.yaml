@@ -27,8 +27,8 @@ services:
             source: .
             target: /code
           - static_data:/app/static
-        env_file:
-          - ../../../private/.env.prod
+        environment:
+          ALLOWED_HOSTS: ['tst.aasp.hum.uu.nl']
         depends_on:
           - db
         ports:
