@@ -19,26 +19,15 @@
                     <strong class="navbar-item">
                         AASP
                     </strong>
-        
-                    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false"
-                        data-target="navbarBasicExample" (click)="toggleBurger()"
-                        [ngClass]="{'is-active': burgerActive}">
-                        <span aria-hidden="true"></span>
-                        <span aria-hidden="true"></span>
-                        <span aria-hidden="true"></span>
-                    </a>
                 </div>
         
-                <div id="navbarBasicExample" class="navbar-menu" [ngClass]="{'is-active': burgerActive}" [@slideInOut]="burgerShow">
+                <div id="navbarAASP" class="navbar-menu" [ngClass]="{'is-active': burgerActive}" [@slideInOut]="burgerShow">
                     <div class="navbar-start">
                         <a class="navbar-item" href="/files">
                             Files
                         </a>
                         <a class="navbar-item" href="/analyze">
                             Analysis
-                        </a>
-                        <a class="navbar-item" href="/download">
-                            Download
                         </a>
                     </div>
                 </div>
