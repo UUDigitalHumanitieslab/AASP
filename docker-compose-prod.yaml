@@ -31,8 +31,7 @@ services:
           - db
         ports:
           - 8000:8000
-        entrypoint: ./entrypoint.sh
-        command: gunicorn --bind 0.0.0.0:8000 --workers 4 aasp.wsgi
+        entrypoint: entrypoint.sh
 
 volumes:
     postgres_data:

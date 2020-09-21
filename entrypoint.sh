@@ -6,4 +6,4 @@ python manage.py collectstatic --no-input --clear
 
 source ../../../private/envvars
 
-exec "$@"
+gunicorn --bind 0.0.0.0:8000 --workers 4 aasp.wsgi
