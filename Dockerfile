@@ -11,4 +11,6 @@ RUN R -e "install.packages('https://cran.r-project.org/src/contrib/Archive/fda/f
 
 WORKDIR /code
 COPY requirements.txt /code/
+
 RUN pip install -r requirements.txt
+RUN mkdir staticfiles
