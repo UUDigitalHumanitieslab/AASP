@@ -13,4 +13,4 @@ WORKDIR /code
 COPY requirements.txt /code/
 
 RUN pip install -r requirements.txt
-RUN mkdir staticfiles
+RUN mkdir /code/staticfiles
