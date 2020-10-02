@@ -94,7 +94,7 @@ f0_pcafd$scores[,2] <- - f0_pcafd$scores[,2]
 if (landmark==TRUE) {
   plot.pca.fd.corr(f0_pcafd,xlab = 'time (ms)',ylab='F0 (norm. semitones)',land = reg$land , nx=40,output_dir = output_dir, basename = 'PCA_f0reg_',height=480) 
 } else {
-  plot.pca.fd.corr(f0_pcafd,xlab = 'time (ms)',ylab='F0 (norm. semitones)', nx=40,output_dir = output_dir, basename = 'PCA_f0reg_',height=480) 
+  plot.pca.fd.corr(f0_pcafd,xlab = 'time (ms)',ylab='F0 (norm. semitones)', nx=40, output_dir = output_dir, basename = 'PCA_f0reg_', height=480) 
 }
 
 # store PC scores in data_FDA, write out to csv
