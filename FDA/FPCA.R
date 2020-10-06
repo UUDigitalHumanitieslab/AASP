@@ -5,9 +5,9 @@ load('/code/FDA/fdaEnvironment.RData')
 output_dir <- file.path(root_dir,'FDA_output/')
 
 args = commandArgs(trailingOnly=TRUE)
-if (length(args)<2) {
-  stop("No knots and lambda parameters passed", call.=FALSE)
-} else if (length(args)==3) {
+if (length(args)<3) {
+  stop("Please provide lambda, number of knots, and number of PC components", call.=FALSE)
+} else if (length(args)==4) {
     landmark <- TRUE
 } else {
     landmark <- FALSE
@@ -79,10 +79,11 @@ if (landmark==TRUE) {
   y_fd <- f0_fd
 }
 
+nharm <-strtoi(args[3])
 # usually a good solution is obtained by setting the same lambda and knots (thus basis) used for smoothing
 lambda_pca <- lambda
 pcafdPar <- fdPar(basis_f0, 2, lambda_pca)
-f0_pcafd <- pca.fd(y_fd, nharm=3, pcafdPar) # first three PCs
+f0_pcafd <- pca.fd(y_fd, nharm=nharm, pcafdPar) # first three PCs
 
 # Invert the sign of PC2, in order to facilitate global analysis, i.e. all features will increase from D to H.
 # This is not necessary in general, but it can help interpreting results when multiple dimensions are involved.
@@ -98,9 +99,9 @@ if (landmark==TRUE) {
 }
 
 # store PC scores in data_FDA, write out to csv
-data_FDA <- data
-data_FDA$f0_s1 <- f0_pcafd$scores[,1]
-data_FDA$f0_s2 <- f0_pcafd$scores[,2]
+scores <- data.frame(f0_pcafd$scores, row.names=NULL)
+colnames(scores) <- c(paste("PC", 1:length(scores), sep=""))
+data_FDA <- cbind(data, scores)
 write.csv(data_FDA, file.path(output_dir, 'fpca_scores.csv'))
 
 

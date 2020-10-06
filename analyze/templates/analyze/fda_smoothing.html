@@ -6,6 +6,8 @@
     which are optimal according to the gvc error plot (below).
     Below that, you can check the curves for all combination of knots 
     and log(lambda) to ensure that no overfitting takes place.
+    Moreover, choose how many principal components should be used for 
+    analyzing the smoothed curves (default: 3).
 </h1>
 <form id="select_smoothing_params_form" method="post">{% csrf_token %}
     <div class="field has-addons">
@@ -28,6 +30,18 @@
                         <option value="{{knot}}"
                         {% if knot == knots %}selected="selected"{% endif %}>
                             Knots: {{knot}}
+                        </option>
+                    {% endfor %}
+                </select>
+            </span>
+        </p>
+        <p class="control">
+            <span class="select">
+                <select name="nharm">
+                    {% for nharm in nharm_values %}
+                        <option value="{{nharm}}"
+                        {% if nharm == nharm_preset %}selected="selected"{% endif %}>
+                            Principal components: {{nharm}}
                         </option>
                     {% endfor %}
                 </select>

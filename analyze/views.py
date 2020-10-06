@@ -119,13 +119,17 @@ class FDASmoothingView(View):
     def get(self, request, *args, **kwargs):
         arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots']
         args = {key: request.session[key] for key in arguments}
+        args['nharm_values'] = [1, 2, 3, 4, 5]
+        args['nharm_preset'] = 3
         return render(request, 'analyze/fda_smoothing.html', args)
 
     def post(self, request, *args, **kwargs):
         lam = request.POST.get('lambda')
         knots = request.POST.get('knots')
-        call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots]
+        nharm = request.POST.get('nharm')
+        call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots, nharm]
         output = subprocess.check_output(call)
+        os.rename('/code/Rplots.pdf', '/code/FDA_output/PCA_f0reg.pdf')
         return HttpResponseRedirect('../download/FDA')
 
 
