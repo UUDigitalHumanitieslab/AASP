@@ -44,13 +44,17 @@ class AnalyzeView(TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        item_list = AASPItem.objects.all()
         analysis_set = request.POST.getlist('checked_files')
         if not op.exists('output'):
             os.makedirs('output')
-        if 'autodi' in request.POST:
+        if 'delete' in request.POST:
             for item_id in analysis_set:
-                item = item_list.get(pk=item_id)
+                AASPItem.objects.filter(pk=item_id).delete()
+            url = reverse('analyze', kwargs=self.kwargs)
+            return HttpResponseRedirect(url)
+        elif 'autodi' in request.POST:
+            for item_id in analysis_set:
+                item = AASPItem.objects.all().get(pk=item_id)
                 analyze_ToDI(item)
             return HttpResponseRedirect('../download/AuToDI')
         elif 'fda' in request.POST:
@@ -59,7 +63,7 @@ class AnalyzeView(TemplateView):
                                             fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
                 for item_id in analysis_set:
-                    item = item_list.get(pk=item_id)
+                    item = AASPItem.objects.all().get(pk=item_id)
                     analyze_pitches_FDA(item)
                     line = {
                         'filename': item.item_id,

@@ -19,7 +19,8 @@
                 <select name="speaker">
                     <option value="all">All speakers</option>
                     {% for speaker in speaker_list %}
-                        <option value="{{speaker}}" {% if speaker == sel_speaker %}selected="selected"{% endif %}>{{speaker}}</option>
+                        <option value="{{speaker}}" {% if speaker == sel_speaker %}selected="selected"{% endif %}>
+                            {{speaker}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -44,6 +45,8 @@
                 <div class="field">
                     <input class="button is-primary" type="submit" name="autodi" value="Run AuToDI for all selected files">
                     <input class="button is-primary" type="submit" name="fda" value="FDA analysis for selected files">
+                    <input class="button is-primary" type="submit" name="delete" value="Delete selected files"
+                           onclick="return confirm('Do you really want to delete the selected files?');">
                 </div>
             </form>
         </div>
