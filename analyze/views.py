@@ -50,7 +50,8 @@ class AnalyzeView(TemplateView):
         if 'delete' in request.POST:
             for item_id in analysis_set:
                 AASPItem.objects.filter(pk=item_id).delete()
-            url = reverse('analyze', kwargs=self.kwargs)
+            # TODO: Redirect keeping the filter
+            url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
             for item_id in analysis_set:
