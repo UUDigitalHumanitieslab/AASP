@@ -10,8 +10,8 @@ from django.template import loader
 from django.views.generic.base import View, TemplateView
 from django.urls import reverse
 
-import parselmouth # Praat wrapper
-import pympi # pympi-ling for textgrid processing
+import parselmouth  # Praat wrapper
+import pympi  # pympi-ling for textgrid processing
 import pandas as pd
 
 from files.views import DownloadView
@@ -26,10 +26,21 @@ class AnalyzeView(TemplateView):
     template_name = 'analyze/overview_files.html'
 
     def get_context_data(self, **kwargs):
-        item_list = AASPItem.objects.all()
-        context = {
-        'item_list': sorted(item_list, key=lambda x: x.item_id),
-        }
+        context = super().get_context_data(**kwargs)
+
+        print(self.request.GET.get('speaker'))
+
+        item_list = AASPItem.objects.all().order_by('item_id')
+        speaker = self.request.GET.get('speaker')
+        if speaker is not None and speaker != 'all':
+            item_list = item_list.filter(speaker=speaker)
+
+        print(item_list)
+
+        speaker_list = AASPItem.objects.values_list('speaker', flat=True).order_by('speaker').distinct('speaker')
+        context['sel_speaker'] = speaker
+        context['item_list'] = item_list
+        context['speaker_list'] = speaker_list
         return context
 
     def post(self, request, *args, **kwargs):
@@ -43,9 +54,9 @@ class AnalyzeView(TemplateView):
                 analyze_ToDI(item)
             return HttpResponseRedirect('../download/AuToDI')
         elif 'fda' in request.POST:
-            with open(csv_file_name, 'w') as f:        
-                csv_writer = csv.DictWriter(f, 
-                fieldnames=('filename', 'spk'))
+            with open(csv_file_name, 'w') as f:
+                csv_writer = csv.DictWriter(f,
+                                            fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
                 for item_id in analysis_set:
                     item = item_list.get(pk=item_id)
@@ -69,7 +80,7 @@ class FDASelectTierView(TemplateView):
         tiers = tg.get_tier_name_num()
         tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
         return {'tier_list': tier_names}
-    
+
     def post(self, request, *args, **kwargs):
         tier = request.POST.get('tier')[0]
         url = reverse('fda_select_interval', kwargs={'tier': tier})
@@ -87,9 +98,9 @@ class FDASelectIntervalView(View):
         df, tg = self.get_initialization_files()
         tier = tg.get_tier(kwargs['tier'])
         ivs = tier.get_intervals()
-        interval_list = ['{}: {}'.format(index+1, i[2]) for index, i in enumerate(ivs)]
+        interval_list = ['{}: {}'.format(index + 1, i[2]) for index, i in enumerate(ivs)]
         return render(request, 'analyze/fda_select_interval.html', {'interval_list': interval_list})
-   
+
     def post(self, request, *args, **kwargs):
         df, tg = self.get_initialization_files()
         interval = int(request.POST.get('interval')[0])
@@ -99,9 +110,9 @@ class FDASelectIntervalView(View):
         for index, f in df.iterrows():
             tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
             tier = tg.get_tier(tier_no)
-            iv = list(tier.get_intervals())[interval-1]
-            start_times.append(int(iv[0]*1000))
-            end_times.append(int(iv[1]*1000))
+            iv = list(tier.get_intervals())[interval - 1]
+            start_times.append(int(iv[0] * 1000))
+            end_times.append(int(iv[1] * 1000))
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
@@ -110,7 +121,7 @@ class FDASelectIntervalView(View):
         grid_knots = output[1].split(" ")[:-1]
         lam, knots = output[-1].split(" ")
         request.session.update({
-            'lambda':lam, 'knots':knots, 
+            'lambda': lam, 'knots': knots,
             'grid_lam': grid_lam, 'grid_knots': grid_knots})
         return HttpResponseRedirect('../../../fda_smoothing')
 
