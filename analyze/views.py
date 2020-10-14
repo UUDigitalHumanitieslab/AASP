@@ -30,7 +30,7 @@ class AnalyzeView(TemplateView):
 
         print(self.request.GET.get('speaker'))
 
-        item_list = AASPItem.objects.all().order_by('item_id')
+        item_list = AASPItem.objects.all().order_by('-id')
         speaker = self.request.GET.get('speaker')
         if speaker is not None and speaker != 'all':
             item_list = item_list.filter(speaker=speaker)
@@ -48,14 +48,13 @@ class AnalyzeView(TemplateView):
         if not op.exists('output'):
             os.makedirs('output')
         if 'delete' in request.POST:
-            for item_id in analysis_set:
-                AASPItem.objects.filter(pk=item_id).delete()
-            # TODO: Redirect keeping the filter
+            for id in analysis_set:
+                AASPItem.objects.filter(pk=id).delete()
             url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
-            for item_id in analysis_set:
-                item = AASPItem.objects.all().get(pk=item_id)
+            for id in analysis_set:
+                item = AASPItem.objects.all().get(pk=id)
                 analyze_ToDI(item)
             return HttpResponseRedirect('../download/AuToDI')
         elif 'fda' in request.POST:
@@ -63,8 +62,8 @@ class AnalyzeView(TemplateView):
                 csv_writer = csv.DictWriter(f,
                                             fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
-                for item_id in analysis_set:
-                    item = AASPItem.objects.all().get(pk=item_id)
+                for id in analysis_set:
+                    item = AASPItem.objects.all().get(pk=id)
                     analyze_pitches_FDA(item)
                     line = {
                         'filename': item.item_id,

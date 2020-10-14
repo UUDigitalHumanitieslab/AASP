@@ -4,15 +4,11 @@ from django.db import models
 
 
 class AASPItem(models.Model):
-    item_id = models.CharField(max_length=100, primary_key=True)
+    item_id = models.CharField(max_length=100)
     speaker = models.CharField(max_length=100)
     wav_file = models.FileField(upload_to='input_files/')
     text_grid_file = models.FileField(upload_to='input_files/')
     pitch_file = models.FileField(upload_to='input_files/', null=True, default=None)
-
-
-# TODO: If a file with the same name but a different speaker is uploaded, the old file is deleted.
-#  I guess this should be handled differently.
 
 @receiver(post_delete)
 def delete_files_when_row_deleted_from_db(sender, instance, **kwargs):

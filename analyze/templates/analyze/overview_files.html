@@ -38,7 +38,7 @@
                 <div class="field">
                     <ul>
                     {% for item in item_list %}
-                        <li><input type="checkbox" name="checked_files" value="{{item.item_id}}"> {{item.speaker}}: {{ item.item_id }}</li>
+                        <li><input type="checkbox" name="checked_files" value="{{item.id}}"> {{item.speaker}}: {{ item.item_id }}</li>
                     {% endfor %}
                     </ul>
                 </div>
