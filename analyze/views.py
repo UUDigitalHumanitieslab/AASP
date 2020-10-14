@@ -27,16 +27,10 @@ class AnalyzeView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        print(self.request.GET.get('speaker'))
-
-        item_list = AASPItem.objects.all().order_by('-id')
+        item_list = AASPItem.objects.all()
         speaker = self.request.GET.get('speaker')
         if speaker is not None and speaker != 'all':
             item_list = item_list.filter(speaker=speaker)
-
-        print(item_list)
-
         speaker_list = AASPItem.objects.values_list('speaker', flat=True).order_by('speaker').distinct('speaker')
         context['sel_speaker'] = speaker
         context['item_list'] = item_list
