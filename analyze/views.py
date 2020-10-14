@@ -92,14 +92,23 @@ class FDASelectIntervalView(View):
    
     def post(self, request, *args, **kwargs):
         df, tg = self.get_initialization_files()
-        interval = int(request.POST.get('interval')[0])
+        interval = request.POST.get('interval')
         tier_no = int(kwargs['tier'])
         start_times = []
         end_times = []
         for index, f in df.iterrows():
             tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
             tier = tg.get_tier(tier_no)
-            iv = list(tier.get_intervals())[interval-1]
+            intervals = list(tier.get_intervals())
+            if 'number' in request.POST:
+                interval_no = int(interval.split(':')[0])
+                iv = intervals[interval_no-1]
+            elif 'text' in request.POST:
+                interval_text = interval.split(': ')[1]
+                iv = next((i for i in intervals if i[2]==interval_text), None)
+                if not iv:
+                    df.drop(index, inplace=True)
+                    continue
             start_times.append(int(iv[0]*1000))
             end_times.append(int(iv[1]*1000))
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)

@@ -1,15 +1,27 @@
 {% extends 'base.html' %}
 
 {% block content %}
-Select the interval you wish to analyze. To guide you, we show the labels
-of the first file of the selected analysis files.
+Select the interval you wish to analyze. To guide you, we show the numbers and
+texts of the intervals in the selected tier of the first file of the selected analysis files.
+You can choose to either analyze all intervals with the same text, or with the same number.
 <form id="select_interval_form" method="post">{% csrf_token %}
-    <select name="interval">
-        {% for interval in interval_list %}
-        <option value="{{interval}}">{{interval}}</option>
-        {% endfor %}
-    </select>
-    <input type="submit">
+    <div class="field is-grouped">
+        <div class="control">
+            <div class="select">
+                <select name="interval">
+                    {% for interval in interval_list %}
+                    <option value="{{interval}}">{{interval}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <p class="control">
+            <input class="button is-primary" type="submit" name="number" value="Select by interval number">
+        </p>
+        <p class="control">
+            <input class="button is-primary" type="submit" name="text" value="Select by interval text">
+        </p>
+    </div>
 </form>
 
 {% endblock %}

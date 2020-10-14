@@ -3,12 +3,20 @@
 {% block content %}
 Select the tier you wish to analyze:
 <form id="select_tier_form" method="post">{% csrf_token %}
-    <select name="tier">
-        {% for tier in tier_list %}
-        <option value="{{tier}}">{{tier}}</option>
-        {% endfor %}
-    </select>
-    <input type="submit">
+    <div class="field is-grouped">
+        <div class="control">
+            <div class="select">
+                <select name="tier">
+                    {% for tier in tier_list %}
+                    <option value="{{tier}}">{{tier}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="control">
+            <input class="button is-primary" type="submit">
+        </div>
+    </div>
 </form>
 
 {% endblock %}
