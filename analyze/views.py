@@ -115,9 +115,12 @@ class FDASelectIntervalView(View):
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
         output = subprocess.check_output(call).decode().split('\n')
+        print(output)
         grid_lam = output[0].split(" ")[:-1]
         grid_knots = output[1].split(" ")[:-1]
-        lam, knots = output[-1].split(" ")
+        lam = output[-3]
+        knots = output[-2]
+        filename = output[-1]
         request.session.update({
             'lambda':lam, 'knots':knots, 
             'grid_lam': grid_lam, 'grid_knots': grid_knots})
