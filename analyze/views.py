@@ -20,7 +20,7 @@ from files.models import AASPItem
 from analyze.analysis import analyze_pitches_FDA, analyze_ToDI
 
 csv_file_name = op.join('input_files', 'data.csv')
-error_message = "Something went wrong. Please contact digitalhumanities(at)uu(dot)nl for support"
+error_message = "Something went wrong. Contact digitalhumanities(at)uu(dot)nl for support."
 
 
 class AnalyzeView(TemplateView):
