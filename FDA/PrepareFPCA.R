@@ -160,4 +160,4 @@ cat(argmin$knots, '\n')
 
 save.image(file=file.path(scripts_dir, 'fdaEnvironment.RData'))
 
-cat(all_data$filename[all_data$id==id][1])
+cat(id)

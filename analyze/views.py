@@ -120,7 +120,9 @@ class FDASelectIntervalView(View):
         grid_knots = output[1].split(" ")[:-1]
         lam = output[-3]
         knots = output[-2]
-        filename = output[-1]
+        file_index= output[-1]
+        filename = df_with_rois.iloc[[int(file_index)-1], 0]
+        print(filename)
         request.session.update({
             'lambda':lam, 'knots':knots, 
             'grid_lam': grid_lam, 'grid_knots': grid_knots})
