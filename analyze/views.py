@@ -124,23 +124,22 @@ class FDASelectIntervalView(View):
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
         output = subprocess.check_output(call).decode().split('\n')
-        print(output)
         grid_lam = output[0].split(" ")[:-1]
         grid_knots = output[1].split(" ")[:-1]
         lam = output[-3]
         knots = output[-2]
         file_index= output[-1]
-        filename = df_with_rois.iloc[[int(file_index)-1], 0]
-        print(filename)
+        filename = df_with_rois.iloc[int(file_index)-1, 0]
         request.session.update({
             'lambda': lam, 'knots': knots,
-            'grid_lam': grid_lam, 'grid_knots': grid_knots})
+            'grid_lam': grid_lam, 'grid_knots': grid_knots,
+            'filename': filename})
         return HttpResponseRedirect('../../../fda_smoothing')
 
 
 class FDASmoothingView(View):
     def get(self, request, *args, **kwargs):
-        arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots']
+        arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots', 'filename']
         args = {key: request.session[key] for key in arguments}
         args['nharm_values'] = [1, 2, 3, 4, 5]
         args['nharm_preset'] = 3
