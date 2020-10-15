@@ -32,7 +32,6 @@ ENV/
 env.bak/
 venv.bak/
 
-# input data and generated data
-/input_files
+# ignore static and generated data
 /staticfiles
 *.RData
