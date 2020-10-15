@@ -20,9 +20,14 @@ from files.models import AASPItem
 from analyze.analysis import analyze_pitches_FDA, analyze_ToDI
 
 csv_file_name = op.join('input_files', 'data.csv')
+error_message = "Something went wrong. Please contact digitalhumanities(at)uu(dot)nl for support"
 
 
 class AnalyzeView(TemplateView):
+    """ This view class provides an overview of all the uploaded files,
+    and enables the user to start analysis with AuToDI, FDA,
+    or to delete files.
+    """
     template_name = 'analyze/overview_files.html'
 
     def get_context_data(self, **kwargs):
@@ -68,6 +73,9 @@ class AnalyzeView(TemplateView):
 
 
 class FDASelectTierView(TemplateView):
+    """ This view class makes it possible to select a tier from the 
+    .TextGrid data of the selected files.
+    """
     template_name = 'analyze/fda_select_tier.html'
 
     def get_context_data(self, **kwargs):
@@ -86,6 +94,9 @@ class FDASelectTierView(TemplateView):
 
 
 class FDASelectIntervalView(View):
+    """ This view class makes it possible to select an interval from the 
+    .TextGrid data of the selected files, after the tier was selected previously.
+    """
     def get_initialization_files(self):
         df = pd.read_csv(csv_file_name)
         check_file = get_tg_name(df.iloc[0]['filename'])
@@ -123,7 +134,10 @@ class FDASelectIntervalView(View):
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
-        output = subprocess.check_output(call).decode().split('\n')
+        try:
+            output = subprocess.check_output(call).decode().split('\n')
+        except subprocess.CalledProcessError:
+            return HttpResponse(error_message)
         grid_lam = output[0].split(" ")[:-1]
         grid_knots = output[1].split(" ")[:-1]
         lam = output[-3]
@@ -138,6 +152,10 @@ class FDASelectIntervalView(View):
 
 
 class FDASmoothingView(View):
+    """ This view class lets the user choose the smoothing parameters
+    and number of principal components to be used for Functional Data Analysis.
+    After selection, performs that analysis.
+    """
     def get(self, request, *args, **kwargs):
         arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots', 'filename']
         args = {key: request.session[key] for key in arguments}
@@ -150,7 +168,10 @@ class FDASmoothingView(View):
         knots = request.POST.get('knots')
         nharm = request.POST.get('nharm')
         call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots, nharm]
-        output = subprocess.check_output(call)
+        try:
+            output = subprocess.check_output(call)
+        except subprocess.CalledProcessError:
+            return HttpResponse(error_message)
         os.rename('/code/Rplots.pdf', '/code/FDA_output/PCA_f0reg.pdf')
         return HttpResponseRedirect('../download/FDA')
 
