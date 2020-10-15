@@ -10,8 +10,8 @@ from django.template import loader
 from django.views.generic.base import View, TemplateView
 from django.urls import reverse
 
-import parselmouth # Praat wrapper
-import pympi # pympi-ling for textgrid processing
+import parselmouth  # Praat wrapper
+import pympi  # pympi-ling for textgrid processing
 import pandas as pd
 
 from files.views import DownloadView
@@ -26,29 +26,38 @@ class AnalyzeView(TemplateView):
     template_name = 'analyze/overview_files.html'
 
     def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
         item_list = AASPItem.objects.all()
-        context = {
-        'item_list': sorted(item_list, key=lambda x: x.item_id),
-        }
+        speaker = self.request.GET.get('speaker')
+        if speaker is not None and speaker != 'all':
+            item_list = item_list.filter(speaker=speaker)
+        speaker_list = AASPItem.objects.values_list('speaker', flat=True).order_by('speaker').distinct('speaker')
+        context['sel_speaker'] = speaker
+        context['item_list'] = item_list
+        context['speaker_list'] = speaker_list
         return context
 
     def post(self, request, *args, **kwargs):
-        item_list = AASPItem.objects.all()
         analysis_set = request.POST.getlist('checked_files')
         if not op.exists('output'):
             os.makedirs('output')
-        if 'autodi' in request.POST:
-            for item_id in analysis_set:
-                item = item_list.get(pk=item_id)
+        if 'delete' in request.POST:
+            for id in analysis_set:
+                AASPItem.objects.filter(pk=id).delete()
+            url = reverse('analyze', args=self.args, kwargs=self.kwargs)
+            return HttpResponseRedirect(url)
+        elif 'autodi' in request.POST:
+            for id in analysis_set:
+                item = AASPItem.objects.all().get(pk=id)
                 analyze_ToDI(item)
             return HttpResponseRedirect('../download/AuToDI')
         elif 'fda' in request.POST:
-            with open(csv_file_name, 'w') as f:        
-                csv_writer = csv.DictWriter(f, 
-                fieldnames=('filename', 'spk'))
+            with open(csv_file_name, 'w') as f:
+                csv_writer = csv.DictWriter(f,
+                                            fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
-                for item_id in analysis_set:
-                    item = item_list.get(pk=item_id)
+                for id in analysis_set:
+                    item = AASPItem.objects.all().get(pk=id)
                     analyze_pitches_FDA(item)
                     line = {
                         'filename': item.item_id,
@@ -69,7 +78,7 @@ class FDASelectTierView(TemplateView):
         tiers = tg.get_tier_name_num()
         tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
         return {'tier_list': tier_names}
-    
+
     def post(self, request, *args, **kwargs):
         tier = request.POST.get('tier')[0]
         url = reverse('fda_select_interval', kwargs={'tier': tier})
@@ -87,9 +96,9 @@ class FDASelectIntervalView(View):
         df, tg = self.get_initialization_files()
         tier = tg.get_tier(kwargs['tier'])
         ivs = tier.get_intervals()
-        interval_list = ['{}: {}'.format(index+1, i[2]) for index, i in enumerate(ivs)]
+        interval_list = ['{}: {}'.format(index + 1, i[2]) for index, i in enumerate(ivs)]
         return render(request, 'analyze/fda_select_interval.html', {'interval_list': interval_list})
-   
+
     def post(self, request, *args, **kwargs):
         df, tg = self.get_initialization_files()
         interval = request.POST.get('interval')
@@ -124,7 +133,7 @@ class FDASelectIntervalView(View):
         filename = df_with_rois.iloc[[int(file_index)-1], 0]
         print(filename)
         request.session.update({
-            'lambda':lam, 'knots':knots, 
+            'lambda': lam, 'knots': knots,
             'grid_lam': grid_lam, 'grid_knots': grid_knots})
         return HttpResponseRedirect('../../../fda_smoothing')
 
