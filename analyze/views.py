@@ -3,6 +3,7 @@ import glob
 import csv
 import os.path as op
 import os
+import sys
 
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
@@ -18,6 +19,10 @@ from files.views import DownloadView
 from files.models import AASPItem
 
 from analyze.analysis import analyze_pitches_FDA, analyze_ToDI
+
+import logging
+logger = logging.getLogger('django')
+
 
 csv_file_name = op.join('input_files', 'data.csv')
 error_message = "Something went wrong. Contact digitalhumanities(at)uu(dot)nl for support."
@@ -134,9 +139,11 @@ class FDASelectIntervalView(View):
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
+        logger.info(sys.stderr)
         try:
             output = subprocess.check_output(call).decode().split('\n')
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as err:
+            logger.error(err)
             return HttpResponse(error_message)
         grid_lam = output[0].split(" ")[:-1]
         grid_knots = output[1].split(" ")[:-1]
@@ -168,9 +175,11 @@ class FDASmoothingView(View):
         knots = request.POST.get('knots')
         nharm = request.POST.get('nharm')
         call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots, nharm]
+        logger.info(sys.stdout)
         try:
             output = subprocess.check_output(call)
-        except subprocess.CalledProcessError:
+        except subprocess.CalledProcessError as err:
+            logger.error(err)
             return HttpResponse(error_message)
         os.rename('/code/Rplots.pdf', '/code/FDA_output/PCA_f0reg.pdf')
         return HttpResponseRedirect('../download/FDA')
