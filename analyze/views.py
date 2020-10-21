@@ -136,6 +136,9 @@ class FDASelectIntervalView(View):
                     continue
             start_times.append(int(iv[0]*1000))
             end_times.append(int(iv[1]*1000))
+        logger.info('Selected tier: {}'.format(tier_no))
+        interval_definition = 'text' if request.POST.get('text') else 'number'
+        logger.info('Selected interval {} by {}'.format(interval, interval_definition))
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]

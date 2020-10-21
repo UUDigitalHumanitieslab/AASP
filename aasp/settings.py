@@ -129,17 +129,24 @@ STATICFILES_DIRS = [
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'time_info': {
+            'format': '{levelname} {asctime} {message}',
+            'style': '{',
+        },
+    },
     'handlers': {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': '/code/aasp.log',
+            'formatter': 'time_info',
         },
     },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': True,
         },
     },
