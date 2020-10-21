@@ -139,7 +139,6 @@ class FDASelectIntervalView(View):
         df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
-        logger.info(sys.stderr)
         try:
             output = subprocess.check_output(call).decode().split('\n')
         except subprocess.CalledProcessError as err:
@@ -175,7 +174,6 @@ class FDASmoothingView(View):
         knots = request.POST.get('knots')
         nharm = request.POST.get('nharm')
         call = ["Rscript", "--vanilla", "FDA/FPCA.R", lam, knots, nharm]
-        logger.info(sys.stdout)
         try:
             output = subprocess.check_output(call)
         except subprocess.CalledProcessError as err:
