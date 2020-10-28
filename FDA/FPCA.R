@@ -29,9 +29,10 @@ basis_f0 <- basis
 fdPar_f0 <- fdPar
 # smooth.basis() does not accept different time samples for different curves.
 # Thus we create smooth curves one by one on the same basis, store the spline coefficients and compose an fd object at the end.
-f0_coefs <- matrix(nrow = nbasis, ncol = n_items)
+f0_coefs <- matrix(nrow = nbasis, ncol = length(ids))
+# we index the f0_coefs matrix with a counter, since some ids may have been skipped (files containing no f0 at region of interest)
 for (id in ids) {
-  t_norm <- (all_data$time_zero[all_data$id==id] / dur_f0[id]) * mean_dur_f0
+  t_norm <- (all_data$time_zero[all_data$id==id] / f0_values$dur_f0[f0_values$id==id]) * mean_dur_f0
   f0_coefs[,id] <- c(smooth.basis(t_norm,all_data$f0_norm[all_data$id==id],fdPar)$fd$coefs)
 }
 f0_fd <- fd(coef=f0_coefs, basisobj=basis)
@@ -101,7 +102,8 @@ if (landmark==TRUE) {
 # store PC scores in data_FDA, write out to csv
 scores <- data.frame(f0_pcafd$scores, row.names=NULL)
 colnames(scores) <- c(paste("PC", 1:length(scores), sep=""))
-data_FDA <- cbind(data, scores)
+data_subset <- subset(data, filename %in% unique(all_data$filename))
+data_FDA <- cbind(data_subset, scores)
 write.csv(data_FDA, file.path(output_dir, 'fpca_scores.csv'))
 
 

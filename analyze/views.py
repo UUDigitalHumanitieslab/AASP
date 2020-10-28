@@ -147,12 +147,12 @@ class FDASelectIntervalView(View):
         except subprocess.CalledProcessError as err:
             logger.error(err)
             return HttpResponse(error_message)
-        grid_lam = output[0].split(" ")[:-1]
-        grid_knots = output[1].split(" ")[:-1]
-        lam = output[-3]
-        knots = output[-2]
-        file_index= output[-1]
-        filename = df_with_rois.iloc[int(file_index)-1, 0]
+        logger.info(output)
+        grid_lam = [int(o) for o in output[-7].split(" ")[:-1]]
+        grid_knots = [int(o) for o in output[-6].split(" ")[:-1]]
+        lam = int(output[-3])
+        knots = int(output[-2])
+        filename = output[-1]
         request.session.update({
             'lambda': lam, 'knots': knots,
             'grid_lam': grid_lam, 'grid_knots': grid_knots,

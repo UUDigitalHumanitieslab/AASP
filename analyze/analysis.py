@@ -35,7 +35,7 @@ def analyze_pitches_FDA(item):
         formants = sound.to_formant_burg(0.005)
         filename = '{}.pitch'.format(op.splitext(op.basename(wav))[0])
         with open(op.join('input_files', filename), 'w+') as f:
-            outfile = csv.DictWriter(f, fieldnames=('time', 'f0', 'f1bark', 'f2bark', 'roi'))
+            outfile = csv.DictWriter(f, fieldnames=('time', 'f0', 'f1bark', 'f2bark'))
             outfile.writeheader()
             for index, t in enumerate(formants.ts()):
                 # get formant 1 and 2 for each time unit
