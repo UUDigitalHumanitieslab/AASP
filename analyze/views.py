@@ -49,6 +49,8 @@ class AnalyzeView(TemplateView):
 
     def post(self, request, *args, **kwargs):
         analysis_set = request.POST.getlist('checked_files')
+        if not analysis_set:
+            return HttpResponse('You did not select any files.')
         if not op.exists('output'):
             os.makedirs('output')
         if 'delete' in request.POST:
@@ -153,10 +155,15 @@ class FDASelectIntervalView(View):
         lam = int(output[-3])
         knots = int(output[-2])
         filename = output[-1]
-        request.session.update({
+        session_dict = {
             'lambda': lam, 'knots': knots,
             'grid_lam': grid_lam, 'grid_knots': grid_knots,
-            'filename': filename})
+            'filename': filename}
+        if len(output) > 7:
+            # warnings about skipped files were generated
+            skipped_files = [o.split(' ')[-2] for o in output[:-7]]
+            session_dict['skipped'] = ', '.join(skipped_files)
+        request.session.update(session_dict)
         return HttpResponseRedirect('../../../fda_smoothing')
 
 
@@ -166,8 +173,8 @@ class FDASmoothingView(View):
     After selection, performs that analysis.
     """
     def get(self, request, *args, **kwargs):
-        arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots', 'filename']
-        args = {key: request.session[key] for key in arguments}
+        arguments = ['lambda', 'knots', 'grid_lam', 'grid_knots', 'filename', 'skipped']
+        args = {key: request.session.get(key) for key in arguments}
         args['nharm_values'] = [1, 2, 3, 4, 5]
         args['nharm_preset'] = 3
         return render(request, 'analyze/fda_smoothing.html', args)

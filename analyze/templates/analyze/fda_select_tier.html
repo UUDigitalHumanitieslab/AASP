@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
+<h1 class="title">
+    Select tier
+</h1>
 Select the tier you wish to analyze:
 <form id="select_tier_form" method="post">{% csrf_token %}
     <div class="field is-grouped">

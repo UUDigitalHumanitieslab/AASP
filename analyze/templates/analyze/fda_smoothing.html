@@ -1,15 +1,29 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1>
-    Choose smoothing parameters. The preselected values are those
-    which are optimal according to the gvc error plot (below).
-    Below that, you can check smoothing results for file 
-    <em>{{filename}}</em> for all combination of knots 
-    and log(lambda) to ensure that no overfitting takes place.
-    Moreover, choose how many principal components should be used for 
-    analyzing the smoothed curves (default: 3).
+<h1 class="title is-3">
+    Analysis settings
 </h1>
+<p class="content">
+    Choose the smoothing parameters (lambda and number of knots) from the dropdown menus.
+    The preselected values are those
+    which are optimal according to the gvc error plot (below). 
+    Also set how many principal components should be used for 
+    analyzing the smoothed curves (default: 3).
+</p>
+{% if skipped %}
+<p class="content">
+    The following files were skipped due to missing pitch information 
+    in the region of interest:
+    {{skipped}}.
+</p>
+{% endif %}
+<p class="content">
+    Below, you can inspect smoothing results for file 
+    <em>{{filename}}</em> for all combination of knots 
+    and log(lambda) to finetune these values (i.e., to avoid overfitting).
+</p>
+
 <form id="select_smoothing_params_form" method="post">{% csrf_token %}
     <div class="field has-addons">
         <p class="control">
