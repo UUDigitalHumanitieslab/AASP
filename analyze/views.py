@@ -53,51 +53,63 @@ class AnalyzeView(TemplateView):
             return HttpResponse('You did not select any files.')
         if not op.exists('output'):
             os.makedirs('output')
+        session_dict = {'analysis_set': analysis_set}
+        request.session.update(session_dict)
         if 'delete' in request.POST:
-            for id in analysis_set:
-                AASPItem.objects.filter(pk=id).delete()
+            for identifier in analysis_set:
+                AASPItem.objects.filter(pk=identifier).delete()
             url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
-            for id in analysis_set:
-                item = AASPItem.objects.all().get(pk=id)
-                analyze_ToDI(item)
-            return HttpResponseRedirect('../download/AuToDI')
+            return HttpResponseRedirect('./select_tier/autodi')
         elif 'fda' in request.POST:
             with open(csv_file_name, 'w') as f:
                 csv_writer = csv.DictWriter(f,
                                             fieldnames=('filename', 'spk'))
                 csv_writer.writeheader()
-                for id in analysis_set:
-                    item = AASPItem.objects.all().get(pk=id)
+                for identifier in analysis_set:
+                    item = AASPItem.objects.all().get(pk=identifier)
                     analyze_pitches_FDA(item)
                     line = {
                         'filename': item.item_id,
                         'spk': item.speaker,
                     }
                     csv_writer.writerow(line)
-            return HttpResponseRedirect('./fda_select_tier')
+            return HttpResponseRedirect('./select_tier/fda')
 
 
-class FDASelectTierView(TemplateView):
+class SelectTierView(TemplateView):
     """ This view class makes it possible to select a tier from the 
     .TextGrid data of the selected files.
     """
-    template_name = 'analyze/fda_select_tier.html'
+    template_name = 'analyze/select_tier.html'
 
-    def get_context_data(self, **kwargs):
-        df = pd.read_csv(csv_file_name)
-        # check the first file in the analysis batch (directly under header)
-        check_file = get_tg_name(df.iloc[0]['filename'])
+    def get_context_data(self, method, **kwargs):
+        context = super().get_context_data(**kwargs)
+        analysis_set = self.request.session.get('analysis_set')
+        # check the first file in the analysis batch
+        item = AASPItem.objects.all().get(pk=analysis_set[0])
+        check_file = str(item.text_grid_file)
         tg = pympi.Praat.TextGrid(check_file)
         tiers = tg.get_tier_name_num()
         tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
         return {'tier_list': tier_names}
 
-    def post(self, request, *args, **kwargs):
-        tier = request.POST.get('tier')[0]
-        url = reverse('fda_select_interval', kwargs={'tier': tier})
-        return HttpResponseRedirect(url)
+    def post(self, request, method, *args, **kwargs):
+        if method == 'fda':
+            tier = request.POST.get('tier').split(':')[0]
+            url = reverse('fda_select_interval', kwargs={'tier': tier})
+            return HttpResponseRedirect(url)
+        elif method == 'autodi':
+            tier = request.POST.get('tier').split(':')[1].strip()
+            analysis_set = request.session.get('analysis_set')
+            for identifier in analysis_set:
+                item = AASPItem.objects.all().get(pk=identifier)
+                analyze_ToDI(item, tier)
+            return HttpResponseRedirect('../../download/AuToDI')
+        else:
+            return HttpResponse('This analysis method is not defined.')
+
 
 
 class FDASelectIntervalView(View):

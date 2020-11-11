@@ -4,7 +4,7 @@ import subprocess
 
 import parselmouth # Praat wrapper
 
-def analyze_ToDI(item):
+def analyze_ToDI(item, tier):
     tg = item.text_grid_file
     wav = item.wav_file
     identifier = item.item_id
@@ -18,7 +18,7 @@ def analyze_ToDI(item):
         "-intermediate_phrase_boundary_detector=AuToDIbdc_burnc.interp.detection.model",
         "-boundary_tone_classifier=AuToDI/v3.7.5_boundary_tone_classification.model",
         "-phrase_accent_classifier=AuToDI/bdc_burnc.phacc.classification.model",
-        "-words_tier_name=segment"
+        "-words_tier_name={}".format(tier)
     ]
     subprocess.check_call(call)
 
