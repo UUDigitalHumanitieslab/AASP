@@ -11,7 +11,7 @@ def analyze_ToDI(item):
     call = ["java", "-jar", "AuToDI/AuToBI.jar",
         "-input_file={}".format(tg),
         "-wav_file={}".format(wav),
-        "-out_file=output/{}_output.TextGrid".format(op.splitext(op.basename(str(wav)))[0]),
+        "-out_file=AuToDI_output/{}_output.TextGrid".format(op.splitext(op.basename(str(wav)))[0]),
         "-pitch_accent_detector=AuToDI/v3.7.5_pitch_accent_detection.model",
         "-pitch_accent_classifier=AuToDI/v3.7.5_pitch_accent_classification20200504.model",
         "-intonational_phrase_boundary_detector=AuToDI/v3.7.5_prosodic_boundary_detection20200504.model",
