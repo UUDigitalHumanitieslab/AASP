@@ -18,8 +18,7 @@ def analyze_ToDI(item):
         "-intermediate_phrase_boundary_detector=AuToDIbdc_burnc.interp.detection.model",
         "-boundary_tone_classifier=AuToDI/v3.7.5_boundary_tone_classification.model",
         "-phrase_accent_classifier=AuToDI/bdc_burnc.phacc.classification.model",
-        "-words_tier_name=segment",
-        "-tones_tier_name=intonation"
+        "-words_tier_name=segment"
     ]
     subprocess.check_call(call)
 
