@@ -63,6 +63,7 @@ for (i in 1:n_items) {
     sample$f0_log <- 12 * logb(sample$f0, base = 2)
     sample$f0_norm <- sample$f0_log / mean(sample$f0_log)
     sample$filename <- data$filename[i]
+    sample$roi <- NULL # remove empty column "roi" (present in older .pitch files)
     all_data <- rbind(all_data, sample)
 }
 
