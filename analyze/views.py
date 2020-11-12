@@ -61,7 +61,9 @@ class AnalyzeView(TemplateView):
             url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
-            return HttpResponseRedirect('./select_tier/autodi')
+            if len(analysis_set) > 30:
+                return HttpResponse('AASP currently does not support AuToDI analysis of more than 30 files.')
+            return HttpResponseRedirect('./select_tier/AuToDI')
         elif 'fda' in request.POST:
             with open(csv_file_name, 'w') as f:
                 csv_writer = csv.DictWriter(f,
@@ -75,7 +77,7 @@ class AnalyzeView(TemplateView):
                         'spk': item.speaker,
                     }
                     csv_writer.writerow(line)
-            return HttpResponseRedirect('./select_tier/fda')
+            return HttpResponseRedirect('./select_tier/FDA')
 
 
 class SelectTierView(TemplateView):
@@ -96,11 +98,11 @@ class SelectTierView(TemplateView):
         return {'tier_list': tier_names}
 
     def post(self, request, method, *args, **kwargs):
-        if method == 'fda':
+        if method == 'FDA':
             tier = request.POST.get('tier').split(':')[0]
             url = reverse('fda_select_interval', kwargs={'tier': tier})
             return HttpResponseRedirect(url)
-        elif method == 'autodi':
+        elif method == 'AuToDI':
             tier = request.POST.get('tier').split(':')[1].strip()
             analysis_set = request.session.get('analysis_set')
             for identifier in analysis_set:
