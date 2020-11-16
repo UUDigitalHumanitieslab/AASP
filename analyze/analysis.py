@@ -15,7 +15,7 @@ def analyze_ToDI(item, tier):
         "-pitch_accent_detector=AuToDI/v3.7.5_pitch_accent_detection.model",
         "-pitch_accent_classifier=AuToDI/v3.7.5_pitch_accent_classification20200504.model",
         "-intonational_phrase_boundary_detector=AuToDI/v3.7.5_prosodic_boundary_detection20200504.model",
-        "-intermediate_phrase_boundary_detector=AuToDI/bdc_burnc.interp.detection.model",
+        "-intermediate_phrase_boundary_detector=none",
         "-boundary_tone_classifier=AuToDI/v3.7.5_boundary_tone_classification.model",
         "-phrase_accent_classifier=AuToDI/bdc_burnc.phacc.classification.model",
         "-words_tier_name={}".format(tier)
