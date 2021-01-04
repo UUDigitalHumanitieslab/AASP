@@ -1,0 +1,75 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+xmin = 0
+xmax = 1.5799329644211904
+tiers? <exists>
+size = 3
+item []:
+item [1]:
+class = "TextTier"
+name = "tones"
+xmin = 0
+xmax = 1.5799329644211904
+points: size = 5
+points [2]:
+time = 0.3651780440008644
+mark = "H-"
+points [3]:
+time = 0.8616400163470658
+mark = "H-"
+points [4]:
+time = 1.1060111891561437
+mark = "L-"
+points [5]:
+time = 1.2910663585453528
+mark = "H-"
+points [6]:
+time = 1.5799329644211904
+mark = "NOTONE"
+item [2]:
+class = "IntervalTier"
+name = "words"
+xmin = 0
+xmax = 1.5799329644211904
+intervals: size = 5
+intervals [1]:
+xmin = 0.14914055719243047
+xmax = 0.3651780440008644
+text = "de"
+intervals [2]:
+xmin = 0.3651780440008644
+xmax = 0.8616400163470658
+text = "poetsvrouw"
+intervals [3]:
+xmin = 0.8784251664855028
+xmax = 1.1060111891561437
+text = "eet"
+intervals [4]:
+xmin = 1.1060111891561437
+xmax = 1.2910663585453528
+text = "een"
+intervals [5]:
+xmin = 1.2910663585453528
+xmax = 1.5799329644211904
+text = "biet"
+item [3]:
+class = "TextTier"
+name = "breaks"
+xmin = 0
+xmax = 1.5799329644211904
+points: size = 5
+points [1]:
+time = 0.3651780440008644
+mark = "1"
+points [2]:
+time = 0.8616400163470658
+mark = "1"
+points [3]:
+time = 1.1060111891561437
+mark = "1"
+points [4]:
+time = 1.2910663585453528
+mark = "1"
+points [5]:
+time = 1.5799329644211904
+mark = "1"

@@ -1,0 +1,59 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+xmin = 0
+xmax = 2.2856189713708908
+tiers? <exists>
+size = 3
+item []:
+item [1]:
+class = "TextTier"
+name = "tones"
+xmin = 0
+xmax = 2.2856189713708908
+points: size = 2
+points [2]:
+time = 0.7965156841715401
+mark = "INTONATIONAL_BOUNDARY"
+points [3]:
+time = 2.2856189713708908
+mark = "INTONATIONAL_BOUNDARY"
+item [2]:
+class = "IntervalTier"
+name = "words"
+xmin = 0
+xmax = 2.2856189713708908
+intervals: size = 4
+intervals [1]:
+xmin = 0.13295494693650012
+xmax = 0.2882504053271985
+text = "de"
+intervals [2]:
+xmin = 0.2882504053271985
+xmax = 0.7965156841715401
+text = "padvinder"
+intervals [3]:
+xmin = 0.7965156841715401
+xmax = 1.1654909150238675
+text = "koopt"
+intervals [4]:
+xmin = 1.3320951561647392
+xmax = 2.2856189713708908
+text = "paasbrood"
+item [3]:
+class = "TextTier"
+name = "breaks"
+xmin = 0
+xmax = 2.2856189713708908
+points: size = 4
+points [1]:
+time = 0.2882504053271985
+mark = "1"
+points [2]:
+time = 0.7965156841715401
+mark = "4"
+points [3]:
+time = 1.1654909150238675
+mark = "1"
+points [4]:
+time = 2.2856189713708908
+mark = "4"
