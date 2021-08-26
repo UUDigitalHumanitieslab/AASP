@@ -28,12 +28,16 @@ class ProvideFilesView(FormView):
         form = self.get_form(form_class)
         files = request.FILES.getlist('directory')
         if form.is_valid():
-            file_names = Counter([op.splitext(op.basename(str(f)))[0] for f in files])
-            pairs = [f for f in file_names.keys() if file_names[f]==2]
+            file_names = Counter(
+                [op.splitext(op.basename(str(f)))[0] for f in files])
+            pairs = [f for f in file_names.keys() if file_names[f] == 2]
             for p in pairs:
-                wav_file = next((f for f in files if op.basename(str(f))=='{}.wav'.format(p)), None)
-                tg_file = next((f for f in files if op.basename(str(f))=='{}.TextGrid'.format(p)), None)
-                new_item = AASPItem(item_id=p, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
+                wav_file = next((f for f in files if op.basename(
+                    str(f)) == '{}.wav'.format(p)), None)
+                tg_file = next((f for f in files if op.basename(
+                    str(f)) == '{}.TextGrid'.format(p)), None)
+                new_item = AASPItem(
+                    item_id=p, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
                 new_item.save()
             return self.form_valid(form)
         else:
@@ -42,7 +46,7 @@ class ProvideFilesView(FormView):
 
 class DownloadView(TemplateView):
     template_name = 'files/download.html'
-    
+
     def post(self, request, method, *args, **kwargs):
         s = io.BytesIO()
         zf = ZipFile(s, "w")
@@ -51,6 +55,7 @@ class DownloadView(TemplateView):
             zf.write(analyzed_file)
             os.remove(analyzed_file)
         zf.close()
-        response = HttpResponse(s.getvalue(), content_type="application/x-zip-compressed")
+        response = HttpResponse(
+            s.getvalue(), content_type="application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=results.zip'
         return response
