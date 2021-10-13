@@ -4,11 +4,11 @@
 #
 #    pip-compile
 #
-asgiref==3.2.3
+asgiref==3.4.1
     # via django
 cycler==0.10.0
     # via matplotlib
-django==3.0.7
+django==3.1.13
     # via -r requirements.in
 gunicorn==20.0.4
     # via -r requirements.in
