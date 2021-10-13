@@ -32,6 +32,7 @@ class ProvideFilesView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         files = request.FILES.getlist('directory')
+        created_items = 0
         if form.is_valid():
             file_names = list(set([op.splitext(op.basename(str(f)))[0] for f in files]))
             for fn in file_names:
@@ -40,10 +41,13 @@ class ProvideFilesView(FormView):
                 tg_file = next((f for f in files if op.basename(
                     str(f)) == '{}.TextGrid'.format(fn)), None)
                 if not wav_file or not tg_file:
-                    return HttpResponse(files_error_message)
+                    continue
                 new_item = AASPItem(
-                    item_id=p, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
+                    item_id=fn, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
                 new_item.save()
+                created_items += 1
+            if not created_items:
+                return HttpResponse(files_error_message)
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
