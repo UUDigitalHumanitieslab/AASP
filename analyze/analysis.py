@@ -1,29 +1,45 @@
 import csv
 import os.path as op
 import subprocess
+import pickle
 
 import parselmouth # Praat wrapper
+from scipy.io import arff
+import pandas as pd
 
-def analyze_ToDI(item):
+def get_features_ToDI(item, tier):
+    """ call AuToBI to generate features,
+    with all classifiers specified so they will be registered as tasks
+    should collect a total of 740 features
+    """
     tg = item.text_grid_file
     wav = item.wav_file
+    arff = '{}.arff'.format(op.splitext(tg.path)[0])
     identifier = item.item_id
     call = ["java", "-jar", "AuToDI/AuToBI.jar",
         "-input_file={}".format(tg),
         "-wav_file={}".format(wav),
-        "-out_file=output/{}_output.TextGrid".format(op.splitext(op.basename(str(wav)))[0]),
-        "-pitch_accent_detector=AuToDI/v3.7.5_pitch_accent_detection.model",
-        "-pitch_accent_classifier=AuToDI/v3.7.5_pitch_accent_classification20200504.model",
-        "-intonational_phrase_boundary_detector=AuToDI/v3.7.5_prosodic_boundary_detection20200504.model",
-        "-intermediate_phrase_boundary_detector=AuToDIbdc_burnc.interp.detection.model",
-        "-boundary_tone_classifier=AuToDI/v3.7.5_boundary_tone_classification.model",
+        "-out_file=output/dumpme.TextGrid",
+        "-arff_file={}".format(arff),
+        "-pitch_accent_detector=AuToDI/bdc_burnc.acc.detection.model",
+        "-pitch_accent_classifier=AuToDI/bdc_burnc.acc.classification.model ",
+        "-intonational_phrase_boundary_detector=AuToDI/bdc_burnc.intonp.detection.model",
+        "-intermediate_phrase_boundary_detector=AuToDI/bdc_burnc.interp.detection.model",
+        "-boundary_tone_classifier=AuToDI/bdc_burnc.pabt.classification.model",
         "-phrase_accent_classifier=AuToDI/bdc_burnc.phacc.classification.model",
-        "-words_tier_name=segment",
-        "-tones_tier_name=intonation"
+        "-words_tier_name={}".format(tier),
     ]
     subprocess.check_call(call)
+    return arff
 
-
+def classify_ToDI(arff_file):
+    with open(arff_file) as f:
+        data, meta = arff.loadarff(f)
+    df = pd.DataFrame(data)
+    with open('AuToDI/pitch_accent_detection.pkl', 'rb') as f:
+        accent_detector = pickle.load(f)
+        accented = accent_detector.predict(df)
+        
 def analyze_pitches_FDA(item):
     wav = str(item.wav_file)
     if not item.pitch_file:

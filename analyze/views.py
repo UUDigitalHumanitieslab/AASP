@@ -5,6 +5,7 @@ import os.path as op
 import os
 import sys
 
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -18,7 +19,7 @@ import pandas as pd
 from files.views import DownloadView
 from files.models import AASPItem
 
-from analyze.analysis import analyze_pitches_FDA, analyze_ToDI
+from analyze.analysis import analyze_pitches_FDA, get_features_ToDI, classify_ToDI
 
 import logging
 logger = logging.getLogger('django')
@@ -54,49 +55,51 @@ class AnalyzeView(TemplateView):
         if not op.exists('output'):
             os.makedirs('output')
         if 'delete' in request.POST:
-            for id in analysis_set:
-                AASPItem.objects.filter(pk=id).delete()
+            for identifier in analysis_set:
+                AASPItem.objects.filter(pk=identifier).delete()
             url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
-            for id in analysis_set:
-                item = AASPItem.objects.all().get(pk=id)
-                analyze_ToDI(item)
-            return HttpResponseRedirect('../download/AuToDI')
+            analysis_type = 'autodi'
         elif 'fda' in request.POST:
-            with open(csv_file_name, 'w') as f:
-                csv_writer = csv.DictWriter(f,
-                                            fieldnames=('filename', 'spk'))
-                csv_writer.writeheader()
-                for id in analysis_set:
-                    item = AASPItem.objects.all().get(pk=id)
-                    analyze_pitches_FDA(item)
-                    line = {
-                        'filename': item.item_id,
-                        'spk': item.speaker,
-                    }
-                    csv_writer.writerow(line)
-            return HttpResponseRedirect('./fda_select_tier')
+            analysis_type = 'fda'
+            for identifier in analysis_set:
+                item = AASPItem.objects.all().get(pk=identifier)
+                analyze_pitches_FDA(item)
+        url = reverse('select_tier', kwargs={
+            'method': analysis_type
+        })
+        request.session['files'] = analysis_set
+        return HttpResponseRedirect(url)
 
 
-class FDASelectTierView(TemplateView):
+class SelectTierView(TemplateView):
     """ This view class makes it possible to select a tier from the 
     .TextGrid data of the selected files.
     """
-    template_name = 'analyze/fda_select_tier.html'
+    template_name = 'analyze/select_tier.html'
 
     def get_context_data(self, **kwargs):
-        df = pd.read_csv(csv_file_name)
-        # check the first file in the analysis batch (directly under header)
-        check_file = get_tg_name(df.iloc[0]['filename'])
-        tg = pympi.Praat.TextGrid(check_file)
+        tg = get_initialization_file(self.request.session)
         tiers = tg.get_tier_name_num()
         tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
         return {'tier_list': tier_names}
 
     def post(self, request, *args, **kwargs):
         tier = request.POST.get('tier')[0]
-        url = reverse('fda_select_interval', kwargs={'tier': tier})
+        if kwargs['method']=='autodi':
+            analysis_set = get_analysis_set(request.session)
+            for identifier in analysis_set:
+                item = AASPItem.objects.all().get(pk=identifier)
+                arff_file = item.arff_file
+                if not arff_file:
+                    arff_file = get_features_ToDI(item, tier)
+                    item.arff_file = arff_file
+                    item.save()
+                classify_ToDI(arff_file)
+            return HttpResponseRedirect('../download/AuToDI')
+        else:
+            url = reverse('fda_select_interval', kwargs={'tier': tier})
         return HttpResponseRedirect(url)
 
 
@@ -104,27 +107,23 @@ class FDASelectIntervalView(View):
     """ This view class makes it possible to select an interval from the 
     .TextGrid data of the selected files, after the tier was selected previously.
     """
-    def get_initialization_files(self):
-        df = pd.read_csv(csv_file_name)
-        check_file = get_tg_name(df.iloc[0]['filename'])
-        tg = pympi.Praat.TextGrid(check_file)
-        return df, tg
+
 
     def get(self, request, *args, **kwargs):
-        df, tg = self.get_initialization_files()
+        tg = get_initialization_file(request.session)
         tier = tg.get_tier(kwargs['tier'])
         ivs = tier.get_intervals()
         interval_list = ['{}: {}'.format(index + 1, i[2]) for index, i in enumerate(ivs)]
         return render(request, 'analyze/fda_select_interval.html', {'interval_list': interval_list})
 
     def post(self, request, *args, **kwargs):
-        df, tg = self.get_initialization_files()
+        analysis_set = get_analysis_set(request.session)
         interval = request.POST.get('interval')
         tier_no = int(kwargs['tier'])
         start_times = []
         end_times = []
-        for index, f in df.iterrows():
-            tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
+        for index, identifier in enumerate(analysis_set):
+            tg = get_tg_object(identifier)
             tier = tg.get_tier(tier_no)
             intervals = list(tier.get_intervals())
             if 'number' in request.POST:
@@ -195,3 +194,13 @@ class FDASmoothingView(View):
 
 def get_tg_name(filename):
     return op.join('input_files', filename + '.TextGrid')
+
+def get_tg_object(identifier):
+    check_file = AASPItem.objects.all().get(pk=identifier).text_grid_file
+    return pympi.Praat.TextGrid(str(check_file))
+
+def get_analysis_set(session):
+    return session.get('files')
+
+def get_initialization_file(session):
+    return get_tg_object(get_analysis_set(session)[0])
