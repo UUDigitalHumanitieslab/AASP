@@ -1,8 +1,11 @@
-FROM python:3.6
+FROM openjdk:slim
+
+COPY --from=python:3.8 / /
+
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update \
-&& apt-get -y install openjdk-11-jdk r-base r-base-dev \
+&& apt-get -y install r-base r-base-dev \
 && rm -rf /var/lib/apt/lists/*
 RUN R -e "install.packages('lattice', repos='http://cran.us.r-project.org')"
 RUN R -e "install.packages('Matrix', repos='http://cran.us.r-project.org')"

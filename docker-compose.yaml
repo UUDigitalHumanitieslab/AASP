@@ -18,6 +18,9 @@ services:
             target: /code
         depends_on:
           - db
+        environment:
+          - LOG_LOCATION:/code/aasp.log
+          - SQL_HOST:db
         ports:
           - 8000:8000
         command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"

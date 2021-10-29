@@ -17,6 +17,11 @@ from django.views.decorators.csrf import csrf_exempt, csrf_protect
 from files.forms import SpeakerDirectoryForm
 from files.models import AASPItem
 
+files_error_message = "AASP couldn't extract pairs of .TextGrid and .wav files \
+    from the directory you tried to upload. \
+    Make sure that you have pairs of .TextGrid and .wav files with the same name \
+    (e.g., 'de_muis_at_kaas.TextGrid' & 'de_muis_at_kaas.wav') in your directory \
+    and then retry the upload."
 
 class ProvideFilesView(FormView):
     form_class = SpeakerDirectoryForm
@@ -27,14 +32,22 @@ class ProvideFilesView(FormView):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
         files = request.FILES.getlist('directory')
+        created_items = 0
         if form.is_valid():
-            file_names = Counter([op.splitext(op.basename(str(f)))[0] for f in files])
-            pairs = [f for f in file_names.keys() if file_names[f]==2]
-            for p in pairs:
-                wav_file = next((f for f in files if op.basename(str(f))=='{}.wav'.format(p)), None)
-                tg_file = next((f for f in files if op.basename(str(f))=='{}.TextGrid'.format(p)), None)
-                new_item = AASPItem(item_id=p, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
+            file_names = list(set([op.splitext(op.basename(str(f)))[0] for f in files]))
+            for fn in file_names:
+                wav_file = next((f for f in files if op.basename(
+                    str(f)) == '{}.wav'.format(fn)), None)
+                tg_file = next((f for f in files if op.basename(
+                    str(f)) == '{}.TextGrid'.format(fn)), None)
+                if not wav_file or not tg_file:
+                    continue
+                new_item = AASPItem(
+                    item_id=fn, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
                 new_item.save()
+                created_items += 1
+            if not created_items:
+                return HttpResponse(files_error_message)
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
@@ -42,7 +55,7 @@ class ProvideFilesView(FormView):
 
 class DownloadView(TemplateView):
     template_name = 'files/download.html'
-    
+
     def post(self, request, method, *args, **kwargs):
         s = io.BytesIO()
         zf = ZipFile(s, "w")
@@ -51,6 +64,7 @@ class DownloadView(TemplateView):
             zf.write(analyzed_file)
             os.remove(analyzed_file)
         zf.close()
-        response = HttpResponse(s.getvalue(), content_type="application/x-zip-compressed")
+        response = HttpResponse(
+            s.getvalue(), content_type="application/x-zip-compressed")
         response['Content-Disposition'] = 'attachment; filename=results.zip'
         return response

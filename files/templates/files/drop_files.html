@@ -4,8 +4,9 @@
     Upload files
 </h1>
 <p class="content">
-    Provide the name of a speaker and select files of
-    .wav and .TextGrid files for that speaker.
+    Provide the name of a speaker and select a directory of
+    .wav and .TextGrid files for that speaker. 
+    Note that AASP expects pairs .wav and .TextGrid files of the same name in the directory.
 </p>
 <form id="speakerdirectoryform" enctype="multipart/form-data" method="post">
     {% csrf_token %}

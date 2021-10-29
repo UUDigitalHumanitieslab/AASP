@@ -1,0 +1,9 @@
+Django
+gunicorn
+matplotlib
+pandas
+Pillow
+praat-parselmouth
+psycopg2
+pympi-ling
+sklearn

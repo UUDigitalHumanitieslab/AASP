@@ -54,6 +54,8 @@ class AnalyzeView(TemplateView):
             return HttpResponse('You did not select any files.')
         if not op.exists('output'):
             os.makedirs('output')
+        session_dict = {'analysis_set': analysis_set}
+        request.session.update(session_dict)
         if 'delete' in request.POST:
             for identifier in analysis_set:
                 AASPItem.objects.filter(pk=identifier).delete()

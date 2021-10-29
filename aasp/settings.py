@@ -139,7 +139,7 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/code/aasp.log',
+            'filename': os.environ.get("LOG_LOCATION", 'aasp.log'),
             'formatter': 'time_info',
         },
     },
