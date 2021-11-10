@@ -88,20 +88,19 @@ class SelectTierView(TemplateView):
         return {'tier_list': tier_names}
 
     def post(self, request, *args, **kwargs):
-        tier = request.POST.get('tier')[0]
+        tier = request.POST.get('tier')
+        tier_index, tier_name = tier.split(': ')
         if kwargs['method']=='autodi':
             analysis_set = get_analysis_set(request.session)
             for identifier in analysis_set:
                 item = AASPItem.objects.all().get(pk=identifier)
-                arff_file = item.arff_file
-                if not arff_file:
-                    arff_file = get_features_ToDI(item, tier)
-                    item.arff_file = arff_file
+                if not item.arff_file:
+                    item.arff_file = get_features_ToDI(item, tier_name)
                     item.save()
-                classify_ToDI(arff_file)
-            return HttpResponseRedirect('../download/AuToDI')
+            classify_ToDI(analysis_set, tier_index)
+            return HttpResponseRedirect('../../download/AuToDI')
         else:
-            url = reverse('fda_select_interval', kwargs={'tier': tier})
+            url = reverse('fda_select_interval', kwargs={'tier': tier_index})
         return HttpResponseRedirect(url)
 
 

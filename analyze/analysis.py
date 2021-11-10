@@ -6,6 +6,10 @@ import pickle
 import parselmouth # Praat wrapper
 from scipy.io import arff
 import pandas as pd
+import numpy as np
+import pympi  # pympi-ling for textgrid processing
+
+from files.models import AASPItem
 
 def get_features_ToDI(item, tier):
     """ call AuToBI to generate features,
@@ -32,13 +36,68 @@ def get_features_ToDI(item, tier):
     subprocess.check_call(call)
     return arff
 
-def classify_ToDI(arff_file):
-    with open(arff_file) as f:
-        data, meta = arff.loadarff(f)
-    df = pd.DataFrame(data)
-    with open('AuToDI/pitch_accent_detection.pkl', 'rb') as f:
+def classify_ToDI(analysis_set, tier_index):
+    """ load the four classifiers for accent detection, accent classification, 
+    boundary detection and boundary classification
+    given an analysis_set (list of item ids), classify all segments
+    write out a TextGrid file with results
+    """
+    with open('AuToDI/classifiers/pitch_accent_detection.pkl', 'rb') as f:
         accent_detector = pickle.load(f)
-        accented = accent_detector.predict(df)
+    with open('AuToDI/classifiers/pitch_accent_classification.pkl', 'rb') as f:
+        accent_classifier = pickle.load(f)
+    with open('AuToDI/classifiers/boundary_detection.pkl', 'rb') as f:
+        boundary_detector = pickle.load(f)
+    with open('AuToDI/classifiers/boundary_classification.pkl', 'rb') as f:
+        boundary_classifier = pickle.load(f)
+    features = accent_detector.feature_names_in_
+    
+    for identifier in analysis_set:
+        item = AASPItem.objects.all().get(pk=identifier)
+        arff_file = str(item.arff_file)
+        with open(arff_file) as f:
+            data, meta = arff.loadarff(f)
+        df = pd.DataFrame(data)
+        # select only the features used for training, replace NaN with 0
+        X = df.loc[:, features].fillna(0)
+        accented = accent_detector.predict(X)
+        accent_classes = []
+        for index, ac in enumerate(accented):
+            if ac == 'accented':
+                tone = [accent_classifier.predict(X.iloc[[index]])]
+            else:
+                tone = None
+            accent_classes.append(tone)
+        boundaries = boundary_detector.predict(X)
+        boundary_classes = []
+        for index, bo in enumerate(boundaries):
+            if bo == True:
+                boundary = [boundary_classifier.predict(X.iloc[[index]])]
+            else:
+                boundary = None
+            boundary_classes.append(boundary)
+        generate_text_grid(item, accent_classes, boundary_classes, tier_index)
+    
+def generate_text_grid(item, accent_classes, boundary_classes, tier_index):
+    tg_file = item.text_grid_file
+    tg = pympi.Praat.TextGrid(str(tg_file))
+    tier = tg.get_tier(int(tier_index))
+    # get all intervals from relevant tier, but skip intervals without text
+    ivs = [i for i in tier.get_intervals() if i[2]!='']
+    accent_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-accent', tier_type='TextTier')
+    boundary_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-boundary', tier_type='TextTier')
+    for index, iv in enumerate(ivs):
+        time = iv[0]
+        if accent_classes[index]:
+            accent_tier.add_point(time, accent_classes[index][0][0])
+        if boundary_classes[index]:
+            boundary_tier.add_point(time, boundary_classes[index][0][0])
+    tg.add_tier('AuToDI-accent', 'TextTier')
+    tg.tiers[-1] = accent_tier
+    tg.add_tier('AuToDI-boundary', 'TextTier')
+    tg.tiers[-1] = boundary_tier
+    output_name = op.join('AuToDI_output', '{}_output.TextGrid'.format(op.splitext(op.basename(str(tg_file)))[0]))
+    tg.to_file(output_name)
         
 def analyze_pitches_FDA(item):
     wav = str(item.wav_file)
