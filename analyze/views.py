@@ -134,7 +134,6 @@ class FDASelectIntervalView(View):
                 interval_text = interval.split(': ')[1]
                 iv = next((i for i in intervals if i[2]==interval_text), None)
                 if not iv:
-                    df.drop(index, inplace=True)
                     continue
             start_times.append(int(iv[0]*1000))
             end_times.append(int(iv[1]*1000))
