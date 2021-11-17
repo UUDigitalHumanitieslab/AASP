@@ -26,7 +26,8 @@ logger = logging.getLogger('django')
 
 
 csv_file_name = op.join('input_files', 'data.csv')
-error_message = "Something went wrong. Contact digitalhumanities(at)uu(dot)nl for support."
+contact_info = "note down the current date and time, and contact digitalhumanities(at)uu(dot)nl for support."
+error_message = "Something went wrong. Please " + contact_info
 
 
 class AnalyzeView(TemplateView):
@@ -108,8 +109,6 @@ class FDASelectIntervalView(View):
     """ This view class makes it possible to select an interval from the 
     .TextGrid data of the selected files, after the tier was selected previously.
     """
-
-
     def get(self, request, *args, **kwargs):
         tg = get_initialization_file(request.session)
         tier = tg.get_tier(kwargs['tier'])
@@ -121,8 +120,7 @@ class FDASelectIntervalView(View):
         analysis_set = get_analysis_set(request.session)
         interval = request.POST.get('interval')
         tier_no = int(kwargs['tier'])
-        start_times = []
-        end_times = []
+        analysis_list = []
         for index, identifier in enumerate(analysis_set):
             tg = get_tg_object(identifier)
             tier = tg.get_tier(tier_no)
@@ -135,12 +133,17 @@ class FDASelectIntervalView(View):
                 iv = next((i for i in intervals if i[2]==interval_text), None)
                 if not iv:
                     continue
-            start_times.append(int(iv[0]*1000))
-            end_times.append(int(iv[1]*1000))
+            item = AASPItem.objects.all().get(pk=identifier)
+            analysis_list.append({
+                'filename': item.item_id,
+                'spk': item.speaker,
+                'roi_start_time': int(iv[0]*1000),
+                'roi_end_time': int(iv[1]*1000)
+            })
         logger.info('Selected tier: {}'.format(tier_no))
         interval_definition = 'text' if request.POST.get('text') else 'number'
         logger.info('Selected interval {} by {}'.format(interval, interval_definition))
-        df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
+        df_with_rois = pd.DataFrame(analysis_list)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
         try:
@@ -187,7 +190,9 @@ class FDASmoothingView(View):
             output = subprocess.check_output(call)
         except subprocess.CalledProcessError as err:
             logger.error(err)
-            return HttpResponse(error_message)
+            message = "Analysis did not work: try to select more files. \
+                If the problem persists,  " + contact_info
+            return HttpResponse(message)
         os.rename('/code/Rplots.pdf', '/code/FDA_output/PCA_f0reg.pdf')
         return HttpResponseRedirect('../download/FDA')
 
