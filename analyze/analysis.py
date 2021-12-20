@@ -15,6 +15,7 @@ def get_features_ToDI(item, tier):
     """ call AuToBI to generate features,
     with all classifiers specified so they will be registered as tasks
     should collect a total of 740 features
+    and store them in an .arff file
     """
     tg = item.text_grid_file
     wav = item.wav_file
