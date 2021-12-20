@@ -5,6 +5,7 @@ import os.path as op
 import os
 import sys
 
+from django.core.cache import cache
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
@@ -18,14 +19,15 @@ import pandas as pd
 from files.views import DownloadView
 from files.models import AASPItem
 
-from analyze.analysis import analyze_pitches_FDA, analyze_ToDI
+from analyze.analysis import analyze_pitches_FDA, get_features_ToDI, classify_ToDI
 
 import logging
 logger = logging.getLogger('django')
 
 
 csv_file_name = op.join('input_files', 'data.csv')
-error_message = "Something went wrong. Contact digitalhumanities(at)uu(dot)nl for support."
+contact_info = "note down the current date and time, and contact digitalhumanities(at)uu(dot)nl for support."
+error_message = "Something went wrong. Please " + contact_info
 
 
 class AnalyzeView(TemplateView):
@@ -61,23 +63,17 @@ class AnalyzeView(TemplateView):
             url = reverse('analyze', args=self.args, kwargs=self.kwargs)
             return HttpResponseRedirect(url)
         elif 'autodi' in request.POST:
-            if len(analysis_set) > 30:
-                return HttpResponse('AASP currently does not support AuToDI analysis of more than 30 files.')
-            return HttpResponseRedirect('./select_tier/AuToDI')
+            analysis_type = 'autodi'
         elif 'fda' in request.POST:
-            with open(csv_file_name, 'w') as f:
-                csv_writer = csv.DictWriter(f,
-                                            fieldnames=('filename', 'spk'))
-                csv_writer.writeheader()
-                for identifier in analysis_set:
-                    item = AASPItem.objects.all().get(pk=identifier)
-                    analyze_pitches_FDA(item)
-                    line = {
-                        'filename': item.item_id,
-                        'spk': item.speaker,
-                    }
-                    csv_writer.writerow(line)
-            return HttpResponseRedirect('./select_tier/FDA')
+            analysis_type = 'fda'
+            for identifier in analysis_set:
+                item = AASPItem.objects.all().get(pk=identifier)
+                analyze_pitches_FDA(item)
+        url = reverse('select_tier', kwargs={
+            'method': analysis_type
+        })
+        request.session['files'] = analysis_set
+        return HttpResponseRedirect(url)
 
 
 class SelectTierView(TemplateView):
@@ -86,59 +82,47 @@ class SelectTierView(TemplateView):
     """
     template_name = 'analyze/select_tier.html'
 
-    def get_context_data(self, method, **kwargs):
-        context = super().get_context_data(**kwargs)
-        analysis_set = self.request.session.get('analysis_set')
-        # check the first file in the analysis batch
-        item = AASPItem.objects.all().get(pk=analysis_set[0])
-        check_file = str(item.text_grid_file)
-        tg = pympi.Praat.TextGrid(check_file)
+    def get_context_data(self, **kwargs):
+        tg = get_initialization_file(self.request.session)
         tiers = tg.get_tier_name_num()
         tier_names = ['{}: {}'.format(t[0], t[1]) for t in tiers]
         return {'tier_list': tier_names}
 
-    def post(self, request, method, *args, **kwargs):
-        if method == 'FDA':
-            tier = request.POST.get('tier').split(':')[0]
-            url = reverse('fda_select_interval', kwargs={'tier': tier})
-            return HttpResponseRedirect(url)
-        elif method == 'AuToDI':
-            tier = request.POST.get('tier').split(':')[1].strip()
-            analysis_set = request.session.get('analysis_set')
+    def post(self, request, *args, **kwargs):
+        tier = request.POST.get('tier')
+        tier_index, tier_name = tier.split(': ')
+        if kwargs['method']=='autodi':
+            analysis_set = get_analysis_set(request.session)
             for identifier in analysis_set:
                 item = AASPItem.objects.all().get(pk=identifier)
-                analyze_ToDI(item, tier)
+                if not item.arff_file:
+                    item.arff_file = get_features_ToDI(item, tier_name)
+                    item.save()
+            classify_ToDI(analysis_set, tier_index)
             return HttpResponseRedirect('../../download/AuToDI')
         else:
-            return HttpResponse('This analysis method is not defined.')
-
+            url = reverse('fda_select_interval', kwargs={'tier': tier_index})
+        return HttpResponseRedirect(url)
 
 
 class FDASelectIntervalView(View):
     """ This view class makes it possible to select an interval from the 
     .TextGrid data of the selected files, after the tier was selected previously.
     """
-    def get_initialization_files(self):
-        df = pd.read_csv(csv_file_name)
-        check_file = get_tg_name(df.iloc[0]['filename'])
-        tg = pympi.Praat.TextGrid(check_file)
-        return df, tg
-
     def get(self, request, *args, **kwargs):
-        df, tg = self.get_initialization_files()
+        tg = get_initialization_file(request.session)
         tier = tg.get_tier(kwargs['tier'])
         ivs = tier.get_intervals()
         interval_list = ['{}: {}'.format(index + 1, i[2]) for index, i in enumerate(ivs)]
         return render(request, 'analyze/fda_select_interval.html', {'interval_list': interval_list})
 
     def post(self, request, *args, **kwargs):
-        df, tg = self.get_initialization_files()
+        analysis_set = get_analysis_set(request.session)
         interval = request.POST.get('interval')
         tier_no = int(kwargs['tier'])
-        start_times = []
-        end_times = []
-        for index, f in df.iterrows():
-            tg = pympi.Praat.TextGrid(get_tg_name(f['filename']))
+        analysis_list = []
+        for index, identifier in enumerate(analysis_set):
+            tg = get_tg_object(identifier)
             tier = tg.get_tier(tier_no)
             intervals = list(tier.get_intervals())
             if 'number' in request.POST:
@@ -148,14 +132,18 @@ class FDASelectIntervalView(View):
                 interval_text = interval.split(': ')[1]
                 iv = next((i for i in intervals if i[2]==interval_text), None)
                 if not iv:
-                    df.drop(index, inplace=True)
                     continue
-            start_times.append(int(iv[0]*1000))
-            end_times.append(int(iv[1]*1000))
+            item = AASPItem.objects.all().get(pk=identifier)
+            analysis_list.append({
+                'filename': item.item_id,
+                'spk': item.speaker,
+                'roi_start_time': int(iv[0]*1000),
+                'roi_end_time': int(iv[1]*1000)
+            })
         logger.info('Selected tier: {}'.format(tier_no))
         interval_definition = 'text' if request.POST.get('text') else 'number'
         logger.info('Selected interval {} by {}'.format(interval, interval_definition))
-        df_with_rois = df.assign(roi_start_time=start_times, roi_end_time=end_times)
+        df_with_rois = pd.DataFrame(analysis_list)
         df_with_rois.to_csv(op.join('input_files', 'data_with_rois.csv'), index=False)
         call = ["Rscript", "--vanilla", "FDA/PrepareFPCA.R"]
         try:
@@ -202,10 +190,22 @@ class FDASmoothingView(View):
             output = subprocess.check_output(call)
         except subprocess.CalledProcessError as err:
             logger.error(err)
-            return HttpResponse(error_message)
+            message = "Analysis did not work: try to select more files. \
+                If the problem persists,  " + contact_info
+            return HttpResponse(message)
         os.rename('/code/Rplots.pdf', '/code/FDA_output/PCA_f0reg.pdf')
         return HttpResponseRedirect('../download/FDA')
 
 
 def get_tg_name(filename):
     return op.join('input_files', filename + '.TextGrid')
+
+def get_tg_object(identifier):
+    check_file = AASPItem.objects.all().get(pk=identifier).text_grid_file
+    return pympi.Praat.TextGrid(str(check_file))
+
+def get_analysis_set(session):
+    return session.get('files')
+
+def get_initialization_file(session):
+    return get_tg_object(get_analysis_set(session)[0])

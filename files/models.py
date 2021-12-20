@@ -9,6 +9,7 @@ class AASPItem(models.Model):
     wav_file = models.FileField(upload_to='input_files/')
     text_grid_file = models.FileField(upload_to='input_files/')
     pitch_file = models.FileField(upload_to='input_files/', null=True, default=None)
+    arff_file = models.FileField(upload_to='input_files', null=True, default=None)
 
 @receiver(post_delete)
 def delete_files_when_row_deleted_from_db(sender, instance, **kwargs):

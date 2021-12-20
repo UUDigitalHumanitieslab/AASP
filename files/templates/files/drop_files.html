@@ -1,15 +1,26 @@
 {% extends 'base.html' %}
 {% block content %}
+<section class="section">
 <h1 class="title is-3">
     Upload files
 </h1>
-<p class="content">
-    Provide the name of a speaker and select a directory of
-    .wav and .TextGrid files for that speaker. 
-    Note that AASP expects pairs .wav and .TextGrid files of the same name in the directory.
-</p>
+    <div>
+        Provide the name of a speaker and select pairs of
+        .wav and .TextGrid files for that speaker.
+    </div>
+    <div>
+        You can select all files within a given directory by pressing <code>ctrl-a</code> (PC) or <code>cmd-a</code> (Mac).
+    </div>
+    <div>
+        Note that AASP expects pairs of .wav and .TextGrid files of the same name.
+    </div>
+</section>
+<section class="section">
 <form id="speakerdirectoryform" enctype="multipart/form-data" method="post">
     {% csrf_token %}
     {{ form.as_p }}
+    <br>
+    <button class="button is-primary" type='submit'>Submit</button>
 </form>
+</section>
 {% endblock %}
