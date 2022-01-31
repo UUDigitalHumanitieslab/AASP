@@ -85,18 +85,23 @@ def generate_text_grid(item, accent_classes, boundary_classes, tier_index):
     tier = tg.get_tier(int(tier_index))
     # get all intervals from relevant tier, but skip intervals without text
     ivs = [i for i in tier.get_intervals() if i[2]!='']
-    accent_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-accent', tier_type='TextTier')
-    boundary_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-boundary', tier_type='TextTier')
+    accent_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-accent', tier_type='IntervalTier')
+    boundary_tier = pympi.Praat.Tier(xmin=tier.xmin, xmax=tier.xmax, name='AuToDI-boundary', tier_type='IntervalTier')
     for index, iv in enumerate(ivs):
-        time = iv[0]
+        start = iv[0]
+        end = iv[1]
         if accent_classes[index]:
-            accent_tier.add_point(time, accent_classes[index][0][0])
+            value = accent_classes[index][0][0].replace('\\', '')
+            accent_tier.add_interval(start, end, value)
         if boundary_classes[index]:
-            boundary_tier.add_point(time, boundary_classes[index][0][0])
-    tg.add_tier('AuToDI-accent', 'TextTier')
-    tg.tiers[-1] = accent_tier
-    tg.add_tier('AuToDI-boundary', 'TextTier')
-    tg.tiers[-1] = boundary_tier
+            value = boundary_classes[index][0][0].replace('\\', '')
+            boundary_tier.add_interval(start, end, value)
+    if list(accent_tier.get_intervals()):
+        tg.add_tier('AuToDI-accent', 'IntervalTier')
+        tg.tiers[-1] = accent_tier
+    if list(boundary_tier.get_intervals()):
+        tg.add_tier('AuToDI-boundary', 'IntervalTier')
+        tg.tiers[-1] = boundary_tier
     output_name = op.join('AuToDI_output', '{}_output.TextGrid'.format(op.splitext(op.basename(str(tg_file)))[0]))
     tg.to_file(output_name)
         

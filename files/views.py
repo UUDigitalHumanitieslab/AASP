@@ -31,7 +31,7 @@ class ProvideFilesView(FormView):
     def post(self, request, *args, **kwargs):
         form_class = self.get_form_class()
         form = self.get_form(form_class)
-        files = request.FILES.getlist('directory')
+        files = request.FILES.getlist('files')
         created_items = 0
         if form.is_valid():
             file_names = list(set([op.splitext(op.basename(str(f)))[0] for f in files]))
