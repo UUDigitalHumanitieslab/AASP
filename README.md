@@ -1,5 +1,20 @@
-# AASP
-An app to classify speech prosody types
+# Automatic Annotation of Speech Prosody
+An application to annotate speech prosody, especially suited to the Dutch language, using two approaches:
+- AuToDI (Automatic ToDI)
+- FDA (Functional Discriminative Analysis)
+
+## Usage
+Add a selection of files from your computer to the analysis set. These files should be pairs of .TextGrid and .wav files of the same name. Add a label (called "Speaker name", but it can be any label which helps to distinguish files), and click "Upload".
+
+In the next step, select files for analysis, and whether to apply AuToDI or FDA. After that, you will be asked which tier in the .TextGrid files should be used for analysis.
+
+## AuToDI
+This part of the code reuses [AuToBI](https://github.com/AndrewRosenberg/AuToBI) (Rosenberg, 2010), a Java application to automatically annotate prosody with ToBI labels. The Java applciation is used for generating descriptors of the frequency development only; custom classifiers were trained for the ToDI annotation system for the Dutch language. These classifiers can be found in `/AuToDI/classifiers`. They are pickled `sklearn` models.
+
+## FDA
+This part of the application extracts f0, f1 and f2 from the audio files with the Python wrapper around Praat, Parselmouth. Then it uses R scripts modified from the [FDA R scripts](https://github.com/uasolo/FDA-DH) by Gubian (cf. Gubian, 2014), which fit [B-splines](https://en.wikipedia.org/wiki/B-spline) to the frequency shapes, and list their principal components.
+
+In order to use FDA, you need to specify how many knots (i.e., how many different curves are "attached" to each other) and which smoothing factor lambda should be used.
 
 # Run
 Download and extract this repository.
