@@ -27,7 +27,7 @@ def get_features_ToDI(item, tier):
         "-out_file=output/dumpme.TextGrid",
         "-arff_file={}".format(arff),
         "-pitch_accent_detector=AuToDI/bdc_burnc.acc.detection.model",
-        "-pitch_accent_classifier=AuToDI/bdc_burnc.acc.classification.model ",
+        "-pitch_accent_classifier=AuToDI/bdc_burnc.acc.classification.model",
         "-intonational_phrase_boundary_detector=AuToDI/bdc_burnc.intonp.detection.model",
         "-intermediate_phrase_boundary_detector=AuToDI/bdc_burnc.interp.detection.model",
         "-boundary_tone_classifier=AuToDI/bdc_burnc.pabt.classification.model",
