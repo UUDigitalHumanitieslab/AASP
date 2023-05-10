@@ -7,3 +7,4 @@ praat-parselmouth
 psycopg2
 pympi-ling
 sklearn
+tqdm
