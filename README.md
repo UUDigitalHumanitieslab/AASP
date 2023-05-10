@@ -8,7 +8,7 @@ For a description of the system, see Hu (2020).
 --- Hu, N., Janssen, B., Hanssen, J., Gussenhoven, C., & Chen, A. (2020). Automatic Analysis of Speech Prosody in Dutch. In Proc. Interspeech 2020 (pp. 155–159). https://doi.org/10.21437/Interspeech.2020-2142
 
 ## Usage
-Add a selection of files from your computer to the analysis set. These files should be pairs of .TextGrid and .wav files of the same name. Add a label (called "Speaker name", but it can be any label which helps to distinguish files), and click "Upload".
+Add a selection of files from your computer to the analysis set. These files should be pairs of .TextGrid and .wav files of the same name. The .wav files should have a sampling rate of 16kHz and contain a single channel. The .TextGrid files should contain at least two boundaries. Add a label (called "Speaker name", but it can be any label which helps to distinguish files), and click "Upload".
 
 In the next step, select files for analysis, and whether to apply AuToDI or FDA. After that, you will be asked which tier in the .TextGrid files should be used for analysis.
 
