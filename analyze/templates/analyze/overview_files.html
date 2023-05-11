@@ -20,14 +20,14 @@
         <form method="get">
             <div class="select">
                 <select name="speaker">
-                    <option value="all">All speakers</option>
+                    <option value="all">All labels</option>
                     {% for speaker in speaker_list %}
                         <option value="{{speaker}}" {% if speaker == sel_speaker %}selected="selected"{% endif %}>
                             {{speaker}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <input class="button is-primary" type="submit" value="Filter by Speaker">
+            <input class="button is-primary" type="submit" value="Filter by label">
         </form>
     {% endif %}
 

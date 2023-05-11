@@ -43,7 +43,7 @@ class ProvideFilesView(FormView):
                 if not wav_file or not tg_file:
                     continue
                 new_item = AASPItem(
-                    item_id=fn, speaker=request.POST['speaker'], wav_file=wav_file, text_grid_file=tg_file)
+                    item_id=fn, speaker=request.POST['label'], wav_file=wav_file, text_grid_file=tg_file)
                 new_item.save()
                 created_items += 1
             if not created_items:
