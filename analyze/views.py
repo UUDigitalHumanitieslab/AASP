@@ -1,22 +1,15 @@
 import subprocess
-import glob
-import csv
 import os.path as op
 import os
-import sys
 
-from django.core.cache import cache
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
-from django.template import loader
 from django.views.generic.base import View, TemplateView
 from django.urls import reverse
 
-import parselmouth  # Praat wrapper
 import pympi  # pympi-ling for textgrid processing
 import pandas as pd
 
-from files.views import DownloadView
 from files.models import AASPItem
 
 from analyze.analysis import analyze_pitches_FDA, get_features_ToDI, classify_ToDI
@@ -66,9 +59,10 @@ class AnalyzeView(TemplateView):
             analysis_type = 'autodi'
         elif 'fda' in request.POST:
             analysis_type = 'fda'
-            for identifier in analysis_set:
+            for count, identifier in enumerate(analysis_set):
                 item = AASPItem.objects.all().get(pk=identifier)
                 analyze_pitches_FDA(item)
+                logger.info('Processed file {} out of {}'.format(count, len(analysis_set)))
         url = reverse('select_tier', kwargs={
             'method': analysis_type
         })
@@ -121,7 +115,7 @@ class FDASelectIntervalView(View):
         interval = request.POST.get('interval')
         tier_no = int(kwargs['tier'])
         analysis_list = []
-        for index, identifier in enumerate(analysis_set):
+        for identifier in analysis_set:
             tg = get_tg_object(identifier)
             tier = tg.get_tier(tier_no)
             intervals = list(tier.get_intervals())
