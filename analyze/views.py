@@ -4,7 +4,6 @@ import csv
 import os.path as op
 import os
 import sys
-from tqdm import tqdm
 
 from django.core.cache import cache
 from django.shortcuts import render, redirect
@@ -67,7 +66,7 @@ class AnalyzeView(TemplateView):
             analysis_type = 'autodi'
         elif 'fda' in request.POST:
             analysis_type = 'fda'
-            for identifier in tqdm(analysis_set):
+            for identifier in analysis_set:
                 item = AASPItem.objects.all().get(pk=identifier)
                 analyze_pitches_FDA(item)
         url = reverse('select_tier', kwargs={

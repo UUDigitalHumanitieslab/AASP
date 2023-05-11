@@ -59,8 +59,6 @@ sqlparse==0.4.2
     # via django
 threadpoolctl==3.0.0
     # via scikit-learn
-tqdm==4.65.0
-    # via -r requirements.in
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
