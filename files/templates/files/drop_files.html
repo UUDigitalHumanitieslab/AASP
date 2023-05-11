@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
 <section class="section">
-<h1 class="title is-3">
+<h3 class="title is-3">
     Upload files
-</h1>
+</h3>
     <div>
         Provide a label for your files and select pairs of
         .wav and .TextGrid files.
@@ -11,14 +11,12 @@
     <div>
         You can select all files within a given directory by pressing <code>ctrl-a</code> (PC) or <code>cmd-a</code> (Mac).
     </div>
-    <div>
-        File requirements:
-        <ul>
-            <li>Upload pairs of .wav and .TextGrid files of the same name.</li>
-            <li>The .wav file should have a sampling rate of 16kHz and contain a single channel.</li>
-            <li>The .TextGrid file should contain at least two boundaries.</li>
-        </ul> 
-    </div>
+    <em>File requirements:</em>
+    <ul>
+        <li>- Upload pairs of .wav and .TextGrid files of the same name.</li>
+        <li>- The .wav file should have a sampling rate of 16kHz and contain a single channel.</li>
+        <li>- The .TextGrid file should contain at least two boundaries.</li>
+    </ul> 
 </section>
 <section class="section">
 <form id="speakerdirectoryform" enctype="multipart/form-data" method="post">
