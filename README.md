@@ -1,4 +1,5 @@
 # Automatic Analysis of Speech Prosody
+Version 1.0.0
 An application to analyze speech prosody, using two approaches:
 - AuToDI (Automatic ToDI) - suited especially for Dutch language files
 - FDA (Functional Discriminative Analysis)
