@@ -26,6 +26,8 @@ DEBUG = os.environ.get('DEBUG', True)
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').strip().split(',')
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 100000000
+DATA_UPLOAD_MAX_NUMBER_FILES = 500
 
 # Application definition
 
