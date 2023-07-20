@@ -1,0 +1,37 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: AASP
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - {}
+  - given-names: Research Software Lab
+    affiliation: Utrecht University'
+    family-names: Centre for Digital Humanities
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.8169033
+repository-code: 'https://github.com/UUDigitalHumanitieslab/AASP'
+abstract: >-
+  AASP (Automatic Analysis of Speech Prosody) is an
+  application to analyze speech prosody, using two
+  approaches:
+
+  - AuToBI (Automatic ToBI, Rosenberg 2010)
+
+  - FDA (Functional Discriminative Analysis, Gubian, 2015)
+
+  It has been adapted for analyzing Dutch language speech
+  prosody.
+keywords:
+  - speech
+  - prosody
+  - classification
+license: BSD-3-Clause
+commit: 190c1ff
+version: 1.0.1
+date-released: '2023-07-20'

@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8064133.svg)](https://doi.org/10.5281/zenodo.8064133)
+
 # Automatic Analysis of Speech Prosody
 An application to analyze speech prosody, using two approaches:
 - AuToDI (Automatic ToDI) - suited especially for Dutch language files
