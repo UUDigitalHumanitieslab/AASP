@@ -8,10 +8,9 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - {}
-  - given-names: Research Software Lab
-    affiliation: Utrecht University'
-    family-names: Centre for Digital Humanities
+  - name: 'Research Software Lab, Centre for Digital Humanities'
+    website: 'https://cdh.uu.nl/centre-for-digital-humanities/research-software-lab/'
+    affiliation: Utrecht University
 identifiers:
   - type: doi
     value: 10.5281/zenodo.8169033
