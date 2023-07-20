@@ -8,7 +8,7 @@ message: >-
   metadata from this file.
 type: software
 authors:
-  - name: 'Research Software Lab, Centre for Digital Humanities'
+  - name: 'Research Software Lab, Centre for Digital Humanities, Utrecht University'
     website: 'https://cdh.uu.nl/centre-for-digital-humanities/research-software-lab/'
     affiliation: Utrecht University
 identifiers:
