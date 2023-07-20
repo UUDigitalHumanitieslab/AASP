@@ -9,9 +9,7 @@ For a description of the system, see Hu (2020):
 
 >Hu, N., Janssen, B., Hanssen, J., Gussenhoven, C., & Chen, A. (2020). Automatic Analysis of Speech Prosody in Dutch. In *Proc. Interspeech* 2020 (pp. 155–159). https://doi.org/10.21437/Interspeech.2020-2142
 
-The application was realized through Utrecht University's Research IT innovation fund awarded to principal investigator [Aoju Chen](https://www.uu.nl/staff/AChen1).
-
-[Project overview](https://cdh.uu.nl/portfolio/automatic-analysis-of-speech-prosody/)
+The application was realized through Utrecht University's Research IT innovation fund awarded to principal investigator [Aoju Chen](https://www.uu.nl/staff/AChen1). See this website for a [project overview](https://cdh.uu.nl/portfolio/automatic-analysis-of-speech-prosody/).
 
 ## Usage
 Add a selection of files from your computer to the analysis set. These files should be pairs of .TextGrid and .wav files of the same name. The .wav files should have a sampling rate of 16kHz and contain a single channel. The .TextGrid files should contain at least two boundaries. Add a label (called "Speaker name", but it can be any label which helps to distinguish files), and click "Upload".
