@@ -39,3 +39,6 @@ venv.bak/
 *.arff
 test*
 output/
+
+# User files
+.DS_Store
