@@ -1,0 +1,40 @@
+services:
+    nginx: 
+        image: nginx:latest
+        volumes:
+          - ./nginx.conf:/etc/nginx/nginx.conf
+          - ../data/source/staticfiles:/static
+        depends_on:
+          - backend
+        ports:
+          - 8080:80
+          - 8443:443
+    db:
+        image: postgres
+        environment:
+          - POSTGRES_DB=${SQL_DATABASE}
+          - POSTGRES_USER=${SQL_USER}
+          - POSTGRES_PASSWORD=${SQL_PASSWORD}
+        volumes:
+          - postgres_data:/var/lib/postgresql/data/
+    backend:
+        build:
+          context: ../data/source
+        volumes:
+          - type: bind
+            source: ../data/source
+            target: /code
+          - static_data:/code/staticfiles
+        environment:
+          - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+          - SECRET_KEY=${SECRET_KEY}
+          - DEBUG=${DEBUG}
+        depends_on:
+          - db
+        ports:
+          - 8000:8000
+        command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --timeout 300 --workers 4 aasp.wsgi"
+
+volumes:
+    postgres_data:
+    static_data:
