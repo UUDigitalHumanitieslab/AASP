@@ -29,6 +29,8 @@ services:
           - ALLOWED_HOSTS=${ALLOWED_HOSTS}
           - SECRET_KEY=${SECRET_KEY}
           - DEBUG=${DEBUG}
+          - SQL_USER=${SQL_USER}
+          - SQL_PASSWORD=${SQL_PASSWORD}
         depends_on:
           - db
         ports:
