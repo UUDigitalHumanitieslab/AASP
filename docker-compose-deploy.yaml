@@ -1,5 +1,5 @@
 services:
-    nginx: 
+    nginx:
         image: nginx:latest
         volumes:
           - ./nginx.conf:/etc/nginx/nginx.conf
@@ -9,6 +9,7 @@ services:
         ports:
           - 8080:80
           - 8443:443
+        restart: always
     db:
         image: postgres
         environment:
@@ -36,6 +37,7 @@ services:
           - db
         ports:
           - 8000:8000
+        restart: always
         command: bash -c "python manage.py collectstatic --noinput && python manage.py migrate && gunicorn --bind 0.0.0.0:8000 --timeout 300 --workers 4 aasp.wsgi"
 
 volumes:
