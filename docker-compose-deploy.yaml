@@ -34,6 +34,8 @@ services:
           - SQL_DATABASE=${SQL_DATABASE}
           - SQL_USER=${SQL_USER}
           - SQL_PASSWORD=${SQL_PASSWORD}
+          - MAX_UPLOADED_FILES=$(MAX_UPLOADED_FILES)
+          - MAX_UPLOADED_SIZE=$(MAX_UPLOADED_SIZE)
         depends_on:
           - db
         ports:

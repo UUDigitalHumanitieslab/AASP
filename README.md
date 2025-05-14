@@ -83,3 +83,21 @@ To start the application on `localhost:8400`, run:
 ```
 python manage.py runserver --port 8400
 ```
+
+# Deployment
+To deploy this software externally, check out this repository on the server. Copy the `docker-compose-deploy.yaml` and `nginx-prod.conf` to a protected directory, and rename them to `docker-compose.yaml` and `nginx.prod`, respectively. Create an `.env` file with the following variables:
+yaml```
+SQL_ENGINE=django.db.backends.postgresql
+SQL_DATABASE={your-database-name}
+SQL_USER={your-database-user}
+SQL_PASSWORD={your-database-password}
+SQL_HOST=db
+SQL_PORT=5432
+MAX_UPLOADED_SIZE=10000000 # set this limit smaller if your server is open to the outside world!
+MAX_UPLOADED_FILES=500 # set this limit smaller if your server is open to the outside world!
+
+SECRET_KEY={your-django-secret-key}
+DEBUG=False
+ALLOWED_HOSTS={the-url-of-your-server}
+```
+Then, run `docker compose up -d` to start the containers.
