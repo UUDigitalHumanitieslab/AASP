@@ -1,20 +1,13 @@
-FROM python:3.9
+FROM python:3.8-slim-bullseye
 
-RUN apt-get update
-
-RUN apt-get install -y openjdk-17-jre
-
-RUN apt-get -y install r-base r-base-dev
-RUN rm -rf /var/lib/apt/lists/*
-
-RUN R -e "install.packages('lattice', repos='http://cran.us.r-project.org')"
-RUN R -e "install.packages('Matrix', repos='http://cran.us.r-project.org')"
-RUN R -e "install.packages('ggplot2', repos='http://cran.us.r-project.org')"
-RUN R -e "install.packages('https://cran.r-project.org/src/contrib/Archive/fda/fda_2.4.0.tar.gz', dependencies=TRUE, repos = NULL, type='source')"
+RUN apt-get update && apt-get install -y openjdk-17-jre-headless r-base r-base-dev libpq-dev
+RUN R -e "install.packages('renv', repos = c(CRAN = 'https://cloud.r-project.org'))"
 
 ENV PYTHONUNBUFFERED 1
 WORKDIR /code
-COPY requirements.txt /code/
+COPY renv.lock /code/
+RUN R -e "renv::restore()"
 
+COPY requirements.txt /code/
 RUN pip install -r requirements.txt
 RUN mkdir /code/staticfiles
