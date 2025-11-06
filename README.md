@@ -23,7 +23,7 @@ In the final step, the results of the analysis can be downloaded as a .zip file.
 
 ## AuToDI
 
-This part of the code reuses [AuToBI](https://github.com/AndrewRosenberg/AuToBI) (Rosenberg, 2010), a Java application to automatically annotate prosody with ToBI labels. The Java applciation is used for generating descriptors of the frequency development only; custom classifiers were trained for the ToDI annotation system for the Dutch language. These classifiers can be found in `/AuToDI/classifiers`. They are pickled `sklearn` models.
+This part of the code reuses [AuToBI](https://github.com/AndrewRosenberg/AuToBI) (Rosenberg, 2010), a Java application to automatically annotate prosody with ToBI labels. The Java application is used for generating descriptors of the frequency development only; custom classifiers were trained for the ToDI annotation system for the Dutch language. These classifiers can be found in `/AuToDI/classifiers`. They are pickled `sklearn` models.
 
 >Rosenberg, A. (2010). Autobi-a tool for automatic tobi annotation. In *Eleventh Annual Conference of the International Speech Communication Association*.
 
@@ -64,6 +64,8 @@ If there is a new version of this software, download and extract to the same loc
 ```bash
 docker compose up --build
 ```
+
+You can then access AASP by going to `http://localhost:8000` using your web browser.
 
 ## Without Docker
 

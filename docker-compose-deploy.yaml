@@ -11,7 +11,7 @@ services:
           - 8443:443
         restart: always
     db:
-        image: postgres
+        image: postgres:17
         restart: always
         environment:
           - POSTGRES_DB=${SQL_DATABASE}
